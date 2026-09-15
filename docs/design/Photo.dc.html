@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    .ph { width: 100%; height: 100%; overflow: hidden; }
+    .ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  </style>
+</helmet>
+<div class="ph">
+  <sc-if value="{{ isXps13 }}" hint-placeholder-val="{{ true }}"><img src="xps13.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isIdeapad }}" hint-placeholder-val="{{ false }}"><img src="ideapad.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isK2 }}" hint-placeholder-val="{{ false }}"><img src="k2.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isMxkeys }}" hint-placeholder-val="{{ false }}"><img src="mxkeys.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isUg27 }}" hint-placeholder-val="{{ false }}"><img src="ug27.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isXm5 }}" hint-placeholder-val="{{ false }}"><img src="xm5.jpg" alt="{{ label }}"></sc-if>
+  <sc-if value="{{ isSsd980 }}" hint-placeholder-val="{{ false }}"><img src="ssd980.jpg" alt="{{ label }}"></sc-if>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"pid":{"editor":"enum","options":["xps13","ideapad","k2","mxkeys","ug27","xm5","980pro"],"default":"xps13"},"label":{"editor":"text","default":"Producto"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pid = this.props.pid ?? 'xps13';
+
+    return {
+      label: this.props.label ?? 'Producto',
+      isXps13: pid === 'xps13',
+      isIdeapad: pid === 'ideapad',
+      isK2: pid === 'k2',
+      isMxkeys: pid === 'mxkeys',
+      isUg27: pid === 'ug27',
+      isXm5: pid === 'xm5',
+      isSsd980: pid === '980pro',
+    };
+  }
+}
+</script>
+</body>
+</html>

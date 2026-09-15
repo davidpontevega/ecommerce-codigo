@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 20px; border-radius: 11px; font-size: 15px; font-weight: 600; border: 1px solid transparent; cursor: pointer; }
+    .step { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--bd); background: transparent; cursor: pointer; }
+    .drawer { animation: slideIn .4s cubic-bezier(.22,1,.36,1) both; }
+    .row { animation: fadeUp .45s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--i,0) * 80ms + 150ms); }
+    @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; position: relative; background: {{t.bg}}; color: {{t.fg}}; font-family: 'Geist', system-ui, sans-serif; overflow: hidden;">
+
+  <!-- DIMMED PAGE BEHIND -->
+  <div style="position: absolute; inset: 0; padding: 40px 64px; opacity: 0.5; filter: blur(2px);">
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;">
+      <div style="width: 150px; height: 20px; border-radius: 6px; background: {{t.muted}};"></div>
+      <div style="flex: 1; height: 40px; border-radius: 10px; background: {{t.muted}};"></div>
+      <div style="width: 90px; height: 36px; border-radius: 9px; background: {{t.muted}};"></div>
+    </div>
+    <div style="width: 55%; height: 44px; border-radius: 10px; background: {{t.muted}}; margin-bottom: 14px;"></div>
+    <div style="width: 40%; height: 44px; border-radius: 10px; background: {{t.muted}}; margin-bottom: 40px;"></div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+      <div style="height: 300px; border-radius: 14px; background: {{t.muted}};"></div>
+      <div style="height: 300px; border-radius: 14px; background: {{t.muted}};"></div>
+      <div style="height: 300px; border-radius: 14px; background: {{t.muted}};"></div>
+      <div style="height: 300px; border-radius: 14px; background: {{t.muted}};"></div>
+    </div>
+  </div>
+
+  <!-- SCRIM -->
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.42);"></div>
+
+  <!-- DRAWER -->
+  <aside class="drawer" style="position: absolute; top: 0; right: 0; width: 452px; height: 900px; display: flex; flex-direction: column; background: {{t.bg}}; border-left: 1px solid {{t.border}}; box-shadow: -30px 0 60px -20px rgba(0,0,0,0.4);">
+
+    <header style="display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid {{t.border}};">
+      <h2 style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Tu carrito <span class="mono" style="color: {{t.mutedFg}}; font-weight: 400;">(3)</span></h2>
+      <button style="width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; border: 1px solid {{t.border}}; background: transparent; cursor: pointer;" aria-label="Cerrar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{t.fg}}" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </header>
+
+    <!-- FREE SHIPPING -->
+    <div style="display: flex; align-items: center; gap: 10px; padding: 14px 24px; border-bottom: 1px solid {{t.border}}; background: {{t.muted}};">
+      <span style="display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; background: {{accent}}; color: #fff; flex-shrink: 0;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <p style="margin: 0; font-size: 13px; color: {{t.fg}};">Tu pedido supera los <span class="mono">$50</span>: <strong>envío gratis</strong> incluido.</p>
+    </div>
+
+    <!-- ITEMS -->
+    <div style="flex: 1; overflow: auto; padding: 8px 24px;">
+      <sc-for list="{{items}}" as="item" hint-placeholder-count="3">
+        <div class="row" style="--i: {{item.i}}; display: flex; gap: 14px; padding: 18px 0; border-bottom: 1px solid {{t.border}};">
+          <div style="width: 76px; height: 76px; flex-shrink: 0; border-radius: 11px; background: {{t.muted}}; display: grid; place-items: center;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="{{t.mutedFg}}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><rect x="2" y="4" width="20" height="12" rx="2"/><path d="M2 20h20"/></svg>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+              <h3 style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3;">{{item.n}}</h3>
+              <button style="background: none; border: none; cursor: pointer; color: {{t.mutedFg}}; padding: 0;" aria-label="Quitar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+            <p style="margin: 3px 0 10px; font-size: 12px; color: {{t.mutedFg}};">{{item.s}}</p>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="step" style="--bd: {{t.border}};">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.fg}}" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <span class="mono" style="min-width: 20px; text-align: center; font-size: 14px; font-weight: 600;">{{item.q}}</span>
+                <button class="step" style="--bd: {{t.border}};">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.fg}}" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <span class="mono" style="font-size: 15px; font-weight: 600;">{{item.p}}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- SUMMARY -->
+    <div style="padding: 20px 24px 24px; border-top: 1px solid {{t.border}}; background: {{t.card}};">
+      <div style="display: flex; justify-content: space-between; font-size: 14px; color: {{t.mutedFg}}; margin-bottom: 8px;">
+        <span>Subtotal</span><span class="mono" style="color: {{t.fg}};">$1,267.00</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 14px; color: {{t.mutedFg}}; margin-bottom: 12px;">
+        <span>Envío</span><span class="mono" style="color: {{accent}}; font-weight: 600;">Gratis</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; padding-top: 12px; border-top: 1px solid {{t.border}};">
+        <span>Total</span><span class="mono">$1,267.00</span>
+      </div>
+      <a href="#" class="btn" style="width: 100%; margin-top: 16px; background: {{accent}}; color: #fff; box-shadow: 0 8px 22px -8px {{accent}};">
+        Tramitar pedido
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <button class="btn" style="width: 100%; margin-top: 10px; background: transparent; color: {{t.fg}}; border-color: {{t.border}};">Seguir comprando</button>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 14px; font-size: 12px; color: {{t.mutedFg}};">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Pago cifrado · Devolución en 30 días
+      </div>
+    </div>
+
+  </aside>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Tema"},"accent":{"editor":"color","default":"#5b5bd6","options":["#5b5bd6","#2563eb","#7c3aed","#be123c"],"section":"Marca"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = (this.props.theme ?? 'light') === 'dark';
+    const accent = this.props.accent ?? '#5b5bd6';
+    const light = {
+      bg: 'oklch(0.99 0.003 250)', fg: 'oklch(0.2 0.02 260)',
+      card: 'oklch(0.97 0.006 250)', muted: 'oklch(0.96 0.006 250)', mutedFg: 'oklch(0.5 0.02 260)',
+      border: 'oklch(0.62 0.02 260 / 0.16)',
+    };
+    const darkT = {
+      bg: 'oklch(0.17 0.01 260)', fg: 'oklch(0.97 0 0)',
+      card: 'oklch(0.2 0.01 260)', muted: 'oklch(0.24 0.012 260)', mutedFg: 'oklch(0.72 0.02 260)',
+      border: 'oklch(1 0 0 / 0.12)',
+    };
+    const t = dark ? darkT : light;
+    const items = [
+      { n: 'Portátil UltraBook 14”', s: 'Core i7 · 16 GB · 512 GB SSD', q: '1', p: '$1,099.00', i: 0 },
+      { n: 'Teclado mecánico RGB', s: 'Switch rojo · inalámbrico', q: '1', p: '$89.00', i: 1 },
+      { n: 'SSD NVMe 1 TB Gen4', s: '7 000 MB/s lectura', q: '1', p: '$79.00', i: 2 },
+    ];
+    return { t, dark, accent, items };
+  }
+}
+</script>
+</body>
+</html>

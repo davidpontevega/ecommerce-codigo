@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    .pill { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 8px 0 22px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; }
+    .icon-btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; cursor: pointer; }
+    .bento { border-radius: 26px; transition: transform .25s cubic-bezier(.22,1,.36,1); }
+    .bento:hover { transform: translateY(-3px); }
+    .reveal { animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both; }
+    .slides { display: flex; transition: transform .6s cubic-bezier(.22,1,.36,1); }
+    .slide { min-width: 100%; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+    @keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    .drift { animation: drift 7s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="width: 1440px; padding: 40px; background: {{t.page}}; font-family: 'Geist', system-ui, sans-serif;">
+  <div class="reveal" style="border-radius: 34px; padding: 18px; background: {{t.shell}}; border: 1px solid {{t.shellBorder}}; box-shadow: 0 40px 90px -40px rgba(30,40,80,0.35); backdrop-filter: blur(24px);">
+
+    <!-- TOP BAR -->
+    <header style="display: flex; align-items: center; gap: 18px; padding: 8px 12px 20px;">
+      <span style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: {{t.fg}};">
+        <span style="display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: {{t.fg}}; color: {{t.shell}};">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        </span>
+        Tech<span style="color: {{accent}};">.</span>
+      </span>
+      <label style="flex: 1; display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 8px 0 20px; border-radius: 999px; background: {{t.card}}; border: 1px solid {{t.cardBorder}};">
+        <input type="search" placeholder="Buscar productos…" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; color: {{t.fg}}; font-size: 15px; font-family: inherit;">
+        <span class="icon-btn" style="width: 38px; height: 38px; background: {{t.fg}}; color: {{t.shell}};">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+      </label>
+      <button class="icon-btn" style="background: {{t.card}}; border: 1px solid {{t.cardBorder}}; color: {{t.fg}};" aria-label="Favoritos">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+      <button class="icon-btn" style="position: relative; background: {{t.fg}}; color: {{t.shell}};" aria-label="Carrito">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="mono" style="position: absolute; top: -2px; right: -2px; width: 17px; height: 17px; display: grid; place-items: center; font-size: 10px; font-weight: 600; border-radius: 999px; background: {{accent}}; color: #fff;">3</span>
+      </button>
+      <button style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px 0 16px; border-radius: 999px; background: {{t.card}}; border: 1px solid {{t.cardBorder}}; color: {{t.fg}}; font-size: 14px; font-weight: 600; cursor: pointer;">
+        Ryman Alex
+        <span style="display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: {{accent}}; color: #fff;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>
+        </span>
+      </button>
+    </header>
+
+    <!-- BENTO GRID -->
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 14px; align-items: start;">
+
+      <!-- HERO (carousel) -->
+      <div style="grid-column: 1; position: relative; overflow: hidden; border-radius: 26px; background: {{t.hero}}; border: 1px solid {{t.cardBorder}}; min-height: 470px;">
+        <div class="slides" style="transform: {{offset}}; height: 100%;">
+          <sc-for list="{{slides}}" as="s" hint-placeholder-count="3">
+            <div class="slide" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; padding: 44px 44px 40px;">
+              <div>
+                <span style="display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 14px; border-radius: 999px; background: {{t.card}}; border: 1px solid {{t.cardBorder}}; font-size: 12px; font-weight: 600; color: {{t.mutedFg}};">
+                  <span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span>{{s.tag}}
+                </span>
+                <h1 style="margin: 22px 0 0; font-size: 58px; line-height: 1.02; letter-spacing: -0.04em; font-weight: 600; color: {{t.fg}}; text-wrap: balance;">{{s.n}}</h1>
+                <div style="display: flex; align-items: center; gap: 16px; margin-top: 28px;">
+                  <span class="mono" style="font-size: 26px; font-weight: 500; color: {{t.mutedFg}};">{{s.idx}}</span>
+                  <span style="flex: 1; height: 1px; background: {{t.cardBorder}}; position: relative;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.mutedFg}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 0; top: -8px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </span>
+                  <span style="max-width: 190px; font-size: 13px; line-height: 1.5; color: {{t.mutedFg}};">{{s.line}}</span>
+                </div>
+                <button class="pill" style="margin-top: 32px; background: {{accent}}; color: #fff;">
+                  {{s.cta}}
+                  <span style="display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: rgba(255,255,255,0.22);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                  </span>
+                </button>
+                <div style="display: flex; align-items: center; gap: 14px; margin-top: 34px; color: {{t.mutedFg}};">
+                  <span style="font-size: 12px;">Síguenos:</span>
+                  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+                  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+                  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+                  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></a>
+                </div>
+              </div>
+              <div class="drift" style="display: grid; place-items: center;">
+                <sc-if value="{{s.isH}}" hint-placeholder-val="{{true}}">
+                  <svg width="290" height="290" viewBox="0 0 200 200" fill="none">
+                    <defs><linearGradient id="hg{{s.i}}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{accent}}"/><stop offset="1" stop-color="{{accent}}" stop-opacity="0.55"/></linearGradient></defs>
+                    <circle cx="100" cy="100" r="86" stroke="{{t.cardBorder}}" stroke-width="1.5" stroke-dasharray="3 6"/>
+                    <path d="M42 108 V96 a58 58 0 0 1 116 0 V108" stroke="url(#hg{{s.i}})" stroke-width="12" stroke-linecap="round"/>
+                    <rect x="30" y="104" width="26" height="52" rx="13" fill="url(#hg{{s.i}})"/>
+                    <rect x="144" y="104" width="26" height="52" rx="13" fill="url(#hg{{s.i}})"/>
+                    <rect x="24" y="112" width="14" height="36" rx="7" fill="{{t.fg}}" opacity="0.85"/>
+                    <rect x="162" y="112" width="14" height="36" rx="7" fill="{{t.fg}}" opacity="0.85"/>
+                    <circle cx="150" cy="46" r="5" fill="{{accent}}"/><circle cx="54" cy="150" r="4" fill="{{accent}}" opacity="0.6"/><circle cx="168" cy="126" r="3" fill="{{t.fg}}" opacity="0.4"/>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{s.isL}}" hint-placeholder-val="{{false}}">
+                  <svg width="300" height="290" viewBox="0 0 220 200" fill="none">
+                    <defs><linearGradient id="lg{{s.i}}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{accent}}"/><stop offset="1" stop-color="{{accent}}" stop-opacity="0.5"/></linearGradient></defs>
+                    <circle cx="110" cy="100" r="86" stroke="{{t.cardBorder}}" stroke-width="1.5" stroke-dasharray="3 6"/>
+                    <rect x="46" y="44" width="128" height="82" rx="8" fill="url(#lg{{s.i}})"/>
+                    <rect x="58" y="56" width="74" height="8" rx="4" fill="#fff" opacity="0.8"/>
+                    <rect x="58" y="72" width="104" height="6" rx="3" fill="#fff" opacity="0.45"/>
+                    <path d="M30 150 L190 150 L176 128 L44 128 Z" fill="{{t.fg}}" opacity="0.12"/>
+                    <path d="M44 128 L176 128" stroke="{{t.fg}}" stroke-width="2" opacity="0.3"/>
+                    <circle cx="176" cy="50" r="5" fill="{{accent}}"/><circle cx="44" cy="150" r="4" fill="{{accent}}" opacity="0.6"/>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{s.isM}}" hint-placeholder-val="{{false}}">
+                  <svg width="300" height="290" viewBox="0 0 220 200" fill="none">
+                    <defs><linearGradient id="mg{{s.i}}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{accent}}"/><stop offset="1" stop-color="{{accent}}" stop-opacity="0.5"/></linearGradient></defs>
+                    <circle cx="110" cy="98" r="86" stroke="{{t.cardBorder}}" stroke-width="1.5" stroke-dasharray="3 6"/>
+                    <rect x="44" y="40" width="132" height="86" rx="10" fill="url(#mg{{s.i}})"/>
+                    <rect x="58" y="54" width="60" height="9" rx="4" fill="#fff" opacity="0.8"/>
+                    <rect x="58" y="72" width="100" height="6" rx="3" fill="#fff" opacity="0.45"/>
+                    <rect x="58" y="88" width="80" height="6" rx="3" fill="#fff" opacity="0.45"/>
+                    <rect x="96" y="126" width="28" height="22" rx="3" fill="{{t.fg}}" opacity="0.2"/>
+                    <rect x="76" y="148" width="68" height="7" rx="3.5" fill="{{t.fg}}" opacity="0.3"/>
+                    <circle cx="176" cy="46" r="5" fill="{{accent}}"/>
+                  </svg>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position: absolute; right: 24px; bottom: 24px; display: flex; gap: 8px;">
+          <sc-for list="{{dots}}" as="d" hint-placeholder-count="3">
+            <button onClick="{{d.go}}" style="width: {{d.w}}; height: 8px; border-radius: 999px; border: none; cursor: pointer; background: {{d.bg}};" aria-label="Cambiar oferta"></button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- RIGHT STACK -->
+      <div style="grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 14px;">
+
+        <div class="bento" style="padding: 22px 24px; background: {{t.card}}; border: 1px solid {{t.cardBorder}};">
+          <p style="margin: 0 0 16px; font-size: 14px; font-weight: 600; color: {{t.fg}};">Colores populares</p>
+          <div style="display: flex; gap: 12px;">
+            <span style="width: 32px; height: 32px; border-radius: 999px; background: oklch(0.55 0.2 264); box-shadow: 0 0 0 3px {{t.card}}, 0 0 0 4.5px oklch(0.55 0.2 264);"></span>
+            <span style="width: 32px; height: 32px; border-radius: 999px; background: oklch(0.72 0.17 60);"></span>
+            <span style="width: 32px; height: 32px; border-radius: 999px; background: oklch(0.65 0.19 150);"></span>
+            <span style="width: 32px; height: 32px; border-radius: 999px; background: oklch(0.6 0.22 20);"></span>
+            <span style="width: 32px; height: 32px; border-radius: 999px; background: oklch(0.78 0.13 195);"></span>
+          </div>
+        </div>
+
+        <div class="bento" style="position: relative; padding: 22px 24px; background: {{t.card}}; border: 1px solid {{t.cardBorder}}; overflow: hidden;">
+          <a href="#" style="position: absolute; top: 18px; right: 18px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: {{t.hero}}; color: {{t.fg}};">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+          <p style="margin: 0; font-size: 14px; font-weight: 600; color: {{t.fg}};">Nueva generación<br>X-Bud Pro</p>
+          <svg width="100%" height="104" viewBox="0 0 260 104" fill="none" style="margin-top: 10px;">
+            <defs><linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{{accent}}"/><stop offset="1" stop-color="{{accent}}" stop-opacity="0.5"/></linearGradient></defs>
+            <path d="M104 22 q-4 -14 12 -14 q16 0 12 20 l-4 20 q-2 12 -14 12 q-14 0 -14 -16 z" fill="url(#eg)"/>
+            <path d="M156 22 q4 -14 -12 -14 q-16 0 -12 20 l4 20 q2 12 14 12 q14 0 14 -16 z" fill="url(#eg)"/>
+            <rect x="108" y="56" width="9" height="32" rx="4.5" fill="{{t.fg}}" opacity="0.8"/>
+            <rect x="143" y="56" width="9" height="32" rx="4.5" fill="{{t.fg}}" opacity="0.8"/>
+          </svg>
+        </div>
+
+        <div class="bento" style="flex: 1; position: relative; display: flex; flex-direction: column; padding: 24px; background: {{t.hero}}; border: 1px solid {{t.cardBorder}}; overflow: hidden; min-height: 300px;">
+          <a href="#" style="position: absolute; top: 18px; right: 18px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: {{t.card}}; border: 1px solid {{t.cardBorder}}; color: {{t.fg}};">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+          <div style="flex: 1; display: grid; place-items: center; padding: 16px 0;">
+            <svg width="210" height="210" viewBox="0 0 200 200" fill="none">
+              <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{{t.fg}}" stop-opacity="0.14"/><stop offset="1" stop-color="{{t.fg}}" stop-opacity="0.05"/></linearGradient></defs>
+              <path d="M40 110 V96 a60 60 0 0 1 120 0 V110" stroke="{{t.fg}}" stroke-width="13" stroke-linecap="round" opacity="0.75"/>
+              <rect x="26" y="104" width="30" height="64" rx="15" fill="url(#sg)" stroke="{{t.fg}}" stroke-width="2" opacity="0.8"/>
+              <rect x="144" y="104" width="30" height="64" rx="15" fill="url(#sg)" stroke="{{t.fg}}" stroke-width="2" opacity="0.8"/>
+              <circle cx="41" cy="136" r="6" fill="{{accent}}"/>
+            </svg>
+          </div>
+          <div>
+            <p style="margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; color: {{t.fg}};">Auriculares Surface</p>
+            <p style="margin: 4px 0 0; font-size: 13px; color: {{t.mutedFg}};">Graves potentes · gris claro</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div style="grid-column: 1; display: grid; grid-template-columns: 1.15fr 1fr 1.1fr; gap: 14px;">
+
+      <!-- MÁS PRODUCTOS -->
+      <div class="bento" style="padding: 20px 22px; background: {{t.card}}; border: 1px solid {{t.cardBorder}};">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <p style="margin: 0; font-size: 14px; font-weight: 600; color: {{t.fg}};">Más productos</p>
+            <p style="margin: 2px 0 0; font-size: 12px; color: {{t.mutedFg}};">460 artículos</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="{{accent}}" stroke="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <span style="flex: 1; aspect-ratio: 1; border-radius: 14px; background: {{t.hero}}; display: grid; place-items: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{t.mutedFg}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></span>
+          <span style="flex: 1; aspect-ratio: 1; border-radius: 14px; background: {{t.hero}}; display: grid; place-items: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{t.mutedFg}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M7 14h10"/></svg></span>
+          <span style="flex: 1; aspect-ratio: 1; border-radius: 14px; background: {{t.hero}}; display: grid; place-items: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{t.mutedFg}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-3a9 9 0 0 1 18 0v3"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/></svg></span>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="bento" style="display: flex; align-items: center; gap: 18px; padding: 20px 22px; background: {{accent}}; color: #fff;">
+        <div style="display: flex;">
+          <span style="width: 30px; height: 30px; border-radius: 999px; background: rgba(255,255,255,0.35); border: 2px solid {{accent}};"></span>
+          <span style="width: 30px; height: 30px; border-radius: 999px; background: rgba(255,255,255,0.28); border: 2px solid {{accent}}; margin-left: -12px;"></span>
+          <span style="width: 30px; height: 30px; border-radius: 999px; background: rgba(255,255,255,0.2); border: 2px solid {{accent}}; margin-left: -12px;"></span>
+        </div>
+        <div>
+          <p class="mono" style="margin: 0; font-size: 22px; font-weight: 600;">5 M+</p>
+          <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.85; display: flex; align-items: center; gap: 5px;">
+            descargas · <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg><span class="mono">[4,6]</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- POPULAR -->
+      <div class="bento" style="position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 22px; background: {{t.card}}; border: 1px solid {{t.cardBorder}};">
+        <a href="#" style="position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: {{t.hero}}; color: {{t.fg}};">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </a>
+        <div style="flex: 1;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: {{accent}};">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>Popular
+          </span>
+          <p style="margin: 4px 0 0; font-size: 14px; font-weight: 600; color: {{t.fg}};">Ya disponible</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: {{t.mutedFg}};">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="{{accent}}" stroke="none"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          <span class="mono">[4,7]</span>
+        </div>
+      </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="display: flex; align-items: center; justify-content: space-between; padding: 22px 14px 8px; font-size: 12px; color: {{t.mutedFg}};">
+      <span>© [AÑO] E-commerce Tech</span>
+      <div style="display: flex; gap: 20px;">
+        <a href="#">Tienda</a><a href="#">Soporte</a><a href="#">Envíos</a><a href="#">Privacidad</a>
+      </div>
+    </footer>
+
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Tema"},"accent":{"editor":"color","default":"#5b5bd6","options":["#5b5bd6","#2563eb","#7c3aed","#be123c"],"section":"Marca"},"$preview":{"width":1440,"height":1040}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { slide: 0 }; }
+  componentDidMount() {
+    this._t = setInterval(() => this.setState((s) => ({ slide: (((s && s.slide) || 0) + 1) % 3 })), 6000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const dark = (this.props.theme ?? 'light') === 'dark';
+    const accent = this.props.accent ?? '#5b5bd6';
+    const light = {
+      page: 'linear-gradient(155deg, oklch(0.92 0.025 250) 0%, oklch(0.95 0.01 210) 45%, oklch(0.95 0.03 95) 100%)',
+      shell: 'oklch(0.99 0.003 250 / 0.72)', shellBorder: 'oklch(1 0 0 / 0.65)',
+      card: 'oklch(1 0 0 / 0.6)', cardBorder: 'oklch(0.62 0.02 260 / 0.16)',
+      hero: 'oklch(0.97 0.008 250 / 0.75)',
+      fg: 'oklch(0.2 0.02 260)', mutedFg: 'oklch(0.5 0.02 260)',
+    };
+    const darkT = {
+      page: 'linear-gradient(155deg, oklch(0.24 0.02 260) 0%, oklch(0.17 0.012 250) 50%, oklch(0.19 0.018 95) 100%)',
+      shell: 'oklch(0.21 0.01 260 / 0.66)', shellBorder: 'oklch(1 0 0 / 0.1)',
+      card: 'oklch(1 0 0 / 0.06)', cardBorder: 'oklch(1 0 0 / 0.12)',
+      hero: 'oklch(1 0 0 / 0.04)',
+      fg: 'oklch(0.97 0 0)', mutedFg: 'oklch(0.72 0.02 260)',
+    };
+    const t = dark ? darkT : light;
+    const base = [
+      { idx: '01', tag: 'Auriculares', n: 'Sonido que inspira', line: 'Cancelación activa y 40 h de batería.', cta: 'Ver auriculares', kind: 'h' },
+      { idx: '02', tag: 'Portátiles', n: 'Potencia sin cables', line: 'UltraBook 14”: Core i7, ligera, todo el día.', cta: 'Ver portátiles', kind: 'l' },
+      { idx: '03', tag: 'Setup', n: 'Tu espacio, listo', line: 'Monitores, teclados y todo para trabajar mejor.', cta: 'Ver setup', kind: 'm' },
+    ];
+    const n = base.length;
+    const cur = (this.state && this.state.slide) || 0;
+    const slide = ((cur % n) + n) % n;
+    const slides = base.map((s, i) => ({ ...s, i, isH: s.kind === 'h', isL: s.kind === 'l', isM: s.kind === 'm' }));
+    const offset = 'translateX(-' + (slide * 100) + '%)';
+    const dots = base.map((s, idx) => ({
+      w: idx === slide ? '24px' : '8px',
+      bg: idx === slide ? accent : t.cardBorder,
+      go: () => this.setState({ slide: idx }),
+    }));
+    return { t, dark, accent, slides, offset, dots };
+  }
+}
+</script>
+</body>
+</html>

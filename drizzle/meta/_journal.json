@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788198210375,
+      "tag": "0000_silly_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788202049023,
+      "tag": "0001_youthful_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788226960240,
+      "tag": "0002_cool_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788835835898,
+      "tag": "0003_fresh_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788839494063,
+      "tag": "0004_fast_korvac",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789143149865,
+      "tag": "0005_fancy_prodigy",
+      "breakpoints": true
+    }
+  ]
+}

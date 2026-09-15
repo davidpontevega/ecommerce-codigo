@@ -1,0 +1,21 @@
+{
+  "pages": [
+    { "id": "landing", "name": "Landing" },
+    { "id": "catalogo", "name": "Catálogo" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1040, "title": "Desktop — Light", "page": "landing", "is_interactive": true },
+    { "file": "MainDark.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 1040, "title": "Desktop — Dark", "page": "landing", "is_interactive": true },
+    { "file": "Mobile.dc.html", "x": 0, "y": 1240, "w": 390, "h": 1300, "title": "Mobile — Light", "page": "landing", "is_interactive": true },
+    { "file": "MobileDark.dc.html", "x": 490, "y": 1240, "w": 390, "h": 1300, "title": "Mobile — Dark", "page": "landing", "is_interactive": true },
+    { "file": "Cart.dc.html", "x": 980, "y": 1240, "w": 1440, "h": 900, "title": "Carrito — slide-over", "page": "landing" },
+    { "file": "Catalog.dc.html", "x": 0, "y": 0, "w": 1440, "h": 2450, "title": "Catálogo — Light", "page": "catalogo", "is_interactive": true },
+    { "file": "CatalogDark.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 2450, "title": "Catálogo — Dark", "page": "catalogo", "is_interactive": true },
+    { "file": "CatalogMobile.dc.html", "x": 0, "y": 2650, "w": 390, "h": 2500, "title": "Catálogo — Mobile", "page": "catalogo", "is_interactive": true }
+  ],
+  "annotations": [
+    { "id": "note-landing", "x": 0, "y": -150, "w": 660, "page": "landing", "text": "Landing minimalista estilo bento (referencia nitec.): ventana glass sobre gradiente suave, hero como carrusel de ofertas con índice 01/02/03, y tarjetas compactas. Poco texto. Tweaks: Tema (light/dark) y color de Marca. Los productos son ilustraciones SVG — en el build real de Next irían fotos." },
+    { "id": "note-catalogo", "x": 0, "y": -150, "w": 660, "page": "catalogo", "text": "Lista de productos con filtros funcionales a la izquierda (categoría, marca, valoración, stock). La cuadrícula y los chips reaccionan. En móvil los filtros abren en hoja inferior. Mismo lenguaje visual glass." }
+  ],
+  "launch": { "view": "canvas", "page": "landing" }
+}

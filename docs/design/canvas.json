@@ -1,0 +1,72 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Landing — desktop 1440",
+      "is_interactive": true
+    },
+    {
+      "file": "Catalogo.dc.html",
+      "x": 0,
+      "y": 1060,
+      "w": 1440,
+      "h": 900,
+      "title": "Catálogo con filtros — desktop 1440",
+      "is_interactive": true
+    },
+    {
+      "file": "Mobile.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Landing — mobile 390",
+      "is_interactive": true
+    },
+    {
+      "file": "Photo.dc.html",
+      "x": 1560,
+      "y": 1060,
+      "w": 320,
+      "h": 200,
+      "title": "Photo — fotos del seed"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "prototipo",
+      "x": -420,
+      "y": 0,
+      "w": 320,
+      "text": "PROTOTIPO CLICKEABLE\n\n· Sol/luna → dark ↔ light\n· Hero: carousel de las 4 ofertas, puntos y flechas, autoplay de 5,6 s\n· Buscador → filtra el catálogo mientras escribís\n· Agregar → suma al carrito y el drawer calcula el total desde centavos\n· Catálogo: los chips de categoría, precio, marca y disponibilidad filtran de verdad; el orden por precio y descuento también\n\nCada artboard tiene su propio estado: el carrito del catálogo no es el de la landing.\n\nEl chip \"Tema\" arriba de cada frame cambia el modo y el acento (lima, eléctrico, violeta, coral)."
+    },
+    {
+      "id": "sistema",
+      "x": -420,
+      "y": 400,
+      "w": 320,
+      "text": "SISTEMA\n\nEsta versión se despega de los tokens shadcn actuales, a propósito, para llegar al look de la referencia:\n\n· radio 26-28 px en tarjetas y 999 px en píldoras, contra los 10 px de --radius\n· fondo con un gradiente frío-cálido muy bajo en croma (≤0.018), tarjetas casi blancas\n· sin bordes: la separación la hace la sombra\n· acento lima solo en la acción principal, el badge de descuento y la tarjeta de ofertas; el estado seleccionado de los filtros usa tinta, no acento\n\nSi te gusta, hay que mover --radius y agregar los tokens --page/--sunk/--accent en globals.css. Si no, se puede volver a 10 px sin tocar la estructura."
+    },
+    {
+      "id": "datos",
+      "x": -420,
+      "y": 860,
+      "w": 320,
+      "text": "DATOS Y FOTOS\n\nLas fotos son las de products.image_url del seed (Unsplash), bajadas y embebidas en el lienzo: acá no hay red, así que no se pueden cargar por URL. En producción salen del campo tal cual.\n\nProductos, precios, marcas y stock vienen de src/server/db/seed.ts; el formato de precio replica src/lib/format.ts y los rangos del filtro comparan en centavos.\n\nSon 7 productos reales. \"tech.\" es un logotipo de trabajo, va reemplazado por el de ustedes.\n\nEsta versión ya no tiene datos inventados entre corchetes: se fueron con las secciones de envíos, garantías, reseñas y newsletter."
+    },
+    {
+      "id": "motion",
+      "x": 1560,
+      "y": 1340,
+      "w": 320,
+      "text": "MOTION\n\nSin salida de red no se puede cargar motion.dev, así que las animaciones son @keyframes con la misma curva y duración. Mapa:\n\n· .rise → animate(el, {opacity:[0,1], y:[16,0]}, {duration:.6, ease:[.22,1,.36,1]})\n· .sl-a/.sl-b y .ph-a/.ph-b → cambio de slide del hero; en React es AnimatePresence + key\n· .gr-a/.gr-b → reentrada de la grilla del catálogo al filtrar (stagger por índice)\n· .slide-right / .slide-up → drawer y bottom sheet\n· .bump → animate(badge, {scale:[1,1.32,1]}, {duration:.42})\n· .lift / .zoom → hover de tarjeta, spring\n\nEase [.22,1,.36,1] en todo."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

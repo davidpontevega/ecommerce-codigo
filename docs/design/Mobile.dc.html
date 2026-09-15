@@ -1,0 +1,463 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: "Geist", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: var(--fg); text-decoration: none; }
+    a:hover { color: var(--muted-fg); }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    input { font: inherit; }
+
+    [data-theme="light"] {
+      --page: linear-gradient(170deg, oklch(0.965 0.008 210) 0%, oklch(0.972 0.012 150) 52%, oklch(0.955 0.018 118) 100%);
+      --fg: oklch(0.17 0.006 150);
+      --card: oklch(0.995 0.003 150);
+      --sunk: oklch(0.955 0.008 150);
+      --muted-fg: oklch(0.53 0.008 150);
+      --border: oklch(0.895 0.006 150);
+      --overlay: oklch(0.17 0.006 150 / 40%);
+      --shadow: 0 1px 2px oklch(0.17 0 0 / 3%), 0 10px 30px oklch(0.17 0 0 / 6%);
+      --shadow-lg: 0 2px 6px oklch(0.17 0 0 / 5%), 0 20px 48px oklch(0.17 0 0 / 12%);
+    }
+    [data-theme="dark"] {
+      --page: linear-gradient(170deg, oklch(0.19 0.008 210) 0%, oklch(0.17 0.01 150) 52%, oklch(0.155 0.014 118) 100%);
+      --fg: oklch(0.985 0 0);
+      --card: oklch(0.225 0.006 150);
+      --sunk: oklch(0.27 0.006 150);
+      --muted-fg: oklch(0.7 0.006 150);
+      --border: oklch(1 0 0 / 9%);
+      --overlay: oklch(0 0 0 / 60%);
+      --shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 10px 30px oklch(0 0 0 / 34%);
+      --shadow-lg: 0 2px 6px oklch(0 0 0 / 34%), 0 20px 48px oklch(0 0 0 / 46%);
+    }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slide-up { from { transform: translateY(100%); } to { transform: none; } }
+    @keyframes pop { 0% { transform: scale(1); } 42% { transform: scale(1.32); } 100% { transform: scale(1); } }
+    /* Dos keyframes idénticos que alternan: reinician la entrada del slide sin remontar el nodo. */
+    @keyframes sl-a { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes sl-b { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes ph-a { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: none; } }
+    @keyframes ph-b { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: none; } }
+
+    .rise { animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .fade { animation: fade 0.2s ease-out both; }
+    .slide-up { animation: slide-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .bump { animation: pop 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+    .sl-a { animation: sl-a 0.48s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .sl-b { animation: sl-b 0.48s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .ph-a { animation: ph-a 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .ph-b { animation: ph-b 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+    .card { border-radius: 26px; background: var(--card); box-shadow: var(--shadow); }
+    .circ { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border: 0; border-radius: 999px; background: var(--sunk); color: var(--fg); transition: background-color 0.2s ease, transform 0.14s ease; }
+    .circ:active { transform: scale(0.93); }
+    .circ-dark { background: var(--fg); color: var(--card); }
+    .pill { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; font-weight: 500; transition: background-color 0.2s ease, transform 0.14s ease; }
+    .pill:active { transform: scale(0.985); }
+    .pill-accent { background: var(--accent); color: var(--on-accent); }
+    .pill-quiet { background: var(--sunk); color: var(--fg); }
+    .pill:disabled { opacity: 0.4; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--sunk); font-size: 11.5px; font-weight: 500; color: var(--muted-fg); }
+    .dot { height: 4px; border-radius: 4px; border: 0; padding: 0; transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease; }
+
+    .scroller { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .scroller::-webkit-scrollbar { display: none; }
+    .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    input:focus { outline: none; }
+  </style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="--accent: {{ accent }}; --on-accent: {{ onAccent }}; position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--page); color: var(--fg); font-size: 15px; line-height: 1.5">
+
+  <div class="scroller">
+    <div style="display: flex; flex-direction: column; gap: 14px; padding: 20px 16px 108px">
+
+      <!-- ── Nav ──────────────────────────────────────────────── -->
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div class="card" style="display: flex; align-items: center; gap: 8px; flex: 1; height: 56px; padding: 0 20px; border-radius: 999px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="6" stroke="currentColor" stroke-width="1.7" />
+            <path d="M8 15.5l3.4-7 3.4 7M9.4 13h4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span style="font-size: 16px; font-weight: 600; letter-spacing: -0.03em">tech.</span>
+        </div>
+        <button class="circ" onClick="{{ toggleTheme }}" aria-label="Cambiar tema" style="width: 56px; height: 56px; background: var(--card); box-shadow: var(--shadow)">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8" /><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.9 5.9l1.4 1.4M16.7 16.7l1.4 1.4M18.1 5.9l-1.4 1.4M7.3 16.7l-1.4 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          </sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4 8.4 8.4 0 1 0 20 14.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+          </sc-if>
+        </button>
+      </div>
+
+      <!-- ── Hero ─────────────────────────────────────────────── -->
+      <section class="card rise" style="padding: 12px 12px 20px">
+        <div style="position: relative; height: 232px; border-radius: 18px; overflow: hidden; background: var(--sunk)">
+          <div class="{{ photoAnim }}" style="width: 100%; height: 100%">
+            <dc-import name="Photo" pid="{{ slide.id }}" label="{{ slide.name }}" hint-size="100%,232px"></dc-import>
+          </div>
+          <span class="mono" style="position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 600">{{ slide.off }}</span>
+        </div>
+
+        <div class="{{ slideAnim }}" style="padding: 18px 10px 0">
+          <span class="tag">{{ slide.cat }}</span>
+          <h1 style="margin: 14px 0 0; font-size: 31px; line-height: 1.05; letter-spacing: -0.04em; font-weight: 600; white-space: pre-line">{{ slide.hook }}</h1>
+          <div style="display: flex; align-items: baseline; gap: 9px; margin-top: 14px">
+            <span class="mono" style="font-size: 23px; font-weight: 600; letter-spacing: -0.028em">{{ slide.price }}</span>
+            <span class="mono" style="font-size: 12.5px; color: var(--muted-fg); text-decoration: line-through">{{ slide.compare }}</span>
+          </div>
+          <div style="margin-top: 2px; font-size: 12.5px; color: var(--muted-fg)">{{ slide.spec }}</div>
+
+          <button class="pill pill-accent" onClick="{{ slide.add }}" style="width: 100%; height: 52px; margin-top: 18px; padding: 0 8px 0 22px; font-size: 15px">
+            <span style="flex: 1; text-align: left">Agregar al carrito</span>
+            <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--on-accent); color: var(--accent)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7h-7M17 7v7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </span>
+          </button>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 16px">
+            <sc-for list="{{ slides }}" as="s" hint-placeholder-count="4">
+              <button class="dot" onClick="{{ s.go }}" aria-label="{{ s.name }}" style="width: {{ s.w }}; background: {{ s.bg }}"></button>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Ofertas ──────────────────────────────────────────── -->
+      <section class="rise" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-radius: 26px; background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow)">
+        <div>
+          <div style="font-size: 13.5px; font-weight: 600">Ofertas</div>
+          <div style="margin-top: 1px; font-size: 12px; opacity: 0.72">{{ offerCount }} con descuento</div>
+        </div>
+        <div class="mono" style="font-size: 26px; font-weight: 600; letter-spacing: -0.03em">{{ countdown }}</div>
+      </section>
+
+      <!-- ── Catálogo ─────────────────────────────────────────── -->
+      <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 6px 6px 0">
+        <span style="font-size: 16px; font-weight: 600; letter-spacing: -0.025em">Catálogo</span>
+        <span style="font-size: 12.5px; color: var(--muted-fg)">{{ totalLabel }}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{ grid }}" as="p" hint-placeholder-count="6">
+          <article class="card rise" style="display: flex; flex-direction: column; padding: 10px">
+            <div style="height: 124px; border-radius: 18px; overflow: hidden; background: var(--sunk); opacity: {{ p.artOpacity }}">
+              <dc-import name="Photo" pid="{{ p.id }}" label="{{ p.name }}" hint-size="100%,124px"></dc-import>
+            </div>
+            <div style="padding: 12px 6px 4px">
+              <div style="font-size: 13.5px; font-weight: 500; line-height: 1.3; text-wrap: pretty">{{ p.name }}</div>
+              <div style="margin-top: 2px; font-size: 11.5px; color: var(--muted-fg)">{{ p.stockNote }}</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px">
+                <span class="mono" style="font-size: 15px; font-weight: 600; letter-spacing: -0.02em">{{ p.price }}</span>
+                <button class="circ circ-dark" onClick="{{ p.add }}" disabled="{{ p.soldOut }}" aria-label="Agregar {{ p.name }}" style="width: 34px; height: 34px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Barra inferior ───────────────────────────────────────── -->
+  <div class="card" style="position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 40; display: flex; align-items: center; gap: 6px; padding: 8px; border-radius: 999px; box-shadow: var(--shadow-lg)">
+    <button class="pill" style="flex: 1; height: 48px; font-size: 14px; background: transparent">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+      Inicio
+    </button>
+    <button class="pill" onClick="{{ openSearch }}" style="flex: 1; height: 48px; font-size: 14px; background: transparent; color: var(--muted-fg)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9" /><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></svg>
+      Buscar
+    </button>
+    <button class="pill pill-accent" onClick="{{ openCart }}" style="height: 48px; padding: 0 20px; font-size: 14px">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 8h11l-1 11.5a1.6 1.6 0 0 1-1.6 1.5H9.1a1.6 1.6 0 0 1-1.6-1.5L6.5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9.5 9.5V7a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+      <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+        <span class="mono {{ bumpClass }}" style="font-weight: 600">{{ cartCount }}</span>
+      </sc-if>
+    </button>
+  </div>
+
+  <!-- ── Buscador ─────────────────────────────────────────────── -->
+  <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="fade" style="position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; background: var(--page)">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div class="card" style="display: flex; align-items: center; flex: 1; height: 56px; padding: 0 20px; border-radius: 999px">
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Buscar productos…" style="flex: 1; border: 0; background: transparent; color: var(--fg); font-size: 15px">
+        </div>
+        <button class="circ" onClick="{{ closeSearch }}" aria-label="Cerrar" style="width: 56px; height: 56px; background: var(--card); box-shadow: var(--shadow)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+
+      <div class="card" style="flex: 1; padding: 10px; overflow-y: auto">
+        <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+          <button onClick="{{ r.add }}" style="display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; min-height: 64px; padding: 8px; border: 0; border-radius: 20px; background: transparent; text-align: left">
+            <div style="height: 48px; border-radius: 15px; overflow: hidden; background: var(--sunk)">
+              <dc-import name="Photo" pid="{{ r.id }}" label="{{ r.name }}" hint-size="100%,48px"></dc-import>
+            </div>
+            <div style="min-width: 0">
+              <div style="font-size: 14px; font-weight: 500; line-height: 1.3">{{ r.name }}</div>
+              <div style="font-size: 12px; color: var(--muted-fg)">{{ r.stockNote }}</div>
+            </div>
+            <span class="mono" style="font-size: 13.5px; font-weight: 500">{{ r.price }}</span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 48px 20px; text-align: center; font-size: 13.5px; color: var(--muted-fg)">Nada para “{{ query }}”.</div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ── Carrito ──────────────────────────────────────────────── -->
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="fade" style="position: absolute; inset: 0; z-index: 80; background: var(--overlay)" onClick="{{ closeCart }}"></div>
+  </sc-if>
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <aside class="slide-up" style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 81; display: flex; flex-direction: column; max-height: 84%; border-radius: 30px 30px 0 0; background: var(--card); box-shadow: var(--shadow-lg)">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 22px 18px 14px 22px">
+        <div style="font-size: 18px; font-weight: 600; letter-spacing: -0.025em">Carrito <span class="mono" style="color: var(--muted-fg); font-weight: 400">{{ cartCount }}</span></div>
+        <button class="circ" onClick="{{ closeCart }}" aria-label="Cerrar" style="width: 42px; height: 42px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+
+      <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 0 14px; overflow-y: auto">
+          <sc-for list="{{ cartItems }}" as="it" hint-placeholder-count="2">
+            <div style="display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px; border-radius: 20px; background: var(--sunk)">
+              <div style="height: 66px; border-radius: 16px; overflow: hidden">
+                <dc-import name="Photo" pid="{{ it.id }}" label="{{ it.name }}" hint-size="100%,66px"></dc-import>
+              </div>
+              <div style="min-width: 0; padding-right: 6px">
+                <div style="font-size: 13.5px; font-weight: 500; line-height: 1.3">{{ it.name }}</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px">
+                  <div style="display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card)">
+                    <button class="circ" onClick="{{ it.dec }}" aria-label="Quitar uno" style="width: 32px; height: 32px; background: transparent">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                    </button>
+                    <span class="mono" style="min-width: 22px; text-align: center; font-size: 13.5px">{{ it.qty }}</span>
+                    <button class="circ" onClick="{{ it.inc }}" aria-label="Agregar uno" style="width: 32px; height: 32px; background: transparent">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                    </button>
+                  </div>
+                  <span class="mono" style="font-size: 14px; font-weight: 500">{{ it.lineTotal }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding: 16px 22px 24px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between">
+            <span style="font-size: 14px; color: var(--muted-fg)">Total</span>
+            <span class="mono" style="font-size: 24px; font-weight: 600; letter-spacing: -0.03em">{{ subtotal }}</span>
+          </div>
+          <button class="pill pill-accent" style="width: 100%; height: 54px; margin-top: 14px; font-size: 15px">Ir a pagar</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 30px 56px">
+          <div class="circ" style="width: 56px; height: 56px; color: var(--muted-fg)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 8h11l-1 11.5a1.6 1.6 0 0 1-1.6 1.5H9.1a1.6 1.6 0 0 1-1.6-1.5L6.5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9.5 9.5V7a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          </div>
+          <div style="font-size: 15px; font-weight: 500">Todavía no hay nada acá</div>
+          <button class="pill pill-quiet" onClick="{{ closeCart }}" style="height: 46px; margin-top: 6px; padding: 0 20px; font-size: 14px">Seguir viendo</button>
+        </div>
+      </sc-if>
+    </aside>
+  </sc-if>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"dark","section":"Tema"},"acento":{"editor":"enum","options":["lima","electrico","violeta","coral"],"default":"lima","section":"Tema"}}'>
+// Par acento / texto sobre el acento: el contraste no se puede calcular en CSS,
+// así que cada opción trae su color de texto.
+const ACCENTS = {
+  lima: { accent: '#d7f24a', on: '#12160a' },
+  electrico: { accent: '#2b6bff', on: '#ffffff' },
+  violeta: { accent: '#7c4dff', on: '#ffffff' },
+  coral: { accent: '#ff6b4a', on: '#180a06' },
+};
+
+const PRODUCTS = [
+  { id: 'xps13', name: 'Dell XPS 13', cat: 'Laptops', price: 549900, compare: 599900, stock: 12, spec: 'Core i7 · 16 GB · 512 GB', hook: 'Ultrabook que\naguanta el día.' },
+  { id: 'ideapad', name: 'Lenovo IdeaPad Gaming 3', cat: 'Laptops', price: 399900, compare: null, stock: 7, spec: 'Ryzen 7 · RTX 3050 · 120 Hz' },
+  { id: 'k2', name: 'Keychron K2', cat: 'Teclados', price: 42900, compare: 49900, stock: 30, spec: '75% · switch marrón', hook: 'Mecánico.\nY sin cables.' },
+  { id: 'mxkeys', name: 'Logitech MX Keys', cat: 'Teclados', price: 39900, compare: null, stock: 0, spec: 'Bajo perfil · multidispositivo' },
+  { id: 'ug27', name: 'LG UltraGear 27"', cat: 'Monitores', price: 129900, compare: 149900, stock: 9, spec: 'QHD · 165 Hz · 1 ms', hook: '165 Hz.\nCero arrastre.' },
+  { id: 'xm5', name: 'Sony WH-1000XM5', cat: 'Audio', price: 179900, compare: null, stock: 15, spec: 'ANC · 30 h de batería' },
+  { id: '980pro', name: 'Samsung 980 Pro 1TB', cat: 'Almacenamiento', price: 49900, compare: 59900, stock: 25, spec: 'NVMe PCIe 4.0 · 7000 MB/s', hook: '7000 MB/s.\nSe acabó esperar.' },
+];
+
+const OFFERS = PRODUCTS.filter((p) => p.compare !== null);
+
+// Espejo de src/lib/format.ts: centavos enteros, agrupación con punto y coma decimal.
+function formatCents(cents) {
+  const abs = Math.abs(cents);
+  const fraction = String(abs % 100).padStart(2, '0');
+  const whole = new Intl.NumberFormat('es-ES', { useGrouping: true, maximumFractionDigits: 0 }).format((abs - (abs % 100)) / 100);
+
+  return 'S/ ' + (cents < 0 ? '-' : '') + whole + ',' + fraction;
+}
+
+function pad(n) {
+  return String(n).padStart(2, '0');
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { theme: null, cart: {}, cartOpen: false, searchOpen: false, query: '', seconds: 8079, bump: false, slide: 0 };
+  }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      this.setState({ seconds: this.state.seconds > 0 ? this.state.seconds - 1 : 0 });
+    }, 1000);
+    this.startAutoplay();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    clearInterval(this.autoplay);
+    clearTimeout(this.bumpTimer);
+  }
+
+  // Se reinicia en cada avance manual: si no, el salto automático llega a
+  // destiempo justo después de que la persona tocó un punto.
+  startAutoplay() {
+    clearInterval(this.autoplay);
+    this.autoplay = setInterval(() => this.goSlide(this.state.slide + 1), 5600);
+  }
+
+  goSlide(next) {
+    const total = OFFERS.length;
+    this.setState({ slide: ((next % total) + total) % total });
+    this.startAutoplay();
+  }
+
+  add(id) {
+    const cart = Object.assign({}, this.state.cart);
+    cart[id] = (cart[id] ?? 0) + 1;
+    this.setState({ cart: cart, bump: true });
+    clearTimeout(this.bumpTimer);
+    this.bumpTimer = setTimeout(() => this.setState({ bump: false }), 460);
+  }
+
+  setQty(id, next) {
+    const cart = Object.assign({}, this.state.cart);
+    if (next <= 0) {
+      delete cart[id];
+    } else {
+      cart[id] = next;
+    }
+    this.setState({ cart: cart });
+  }
+
+  decorate(p) {
+    return {
+      id: p.id,
+      name: p.name,
+      cat: p.cat,
+      spec: p.spec,
+      hook: p.hook ?? p.name,
+      price: formatCents(p.price),
+      compare: p.compare === null ? '' : formatCents(p.compare),
+      off: p.compare === null ? '' : '-' + Math.round((1 - p.price / p.compare) * 100) + ' %',
+      soldOut: p.stock === 0,
+      artOpacity: p.stock === 0 ? '0.45' : '1',
+      stockNote: p.stock === 0 ? 'Agotado' : p.stock + ' en stock',
+      add: () => this.add(p.id),
+    };
+  }
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'dark';
+    const pair = ACCENTS[this.props.acento ?? 'lima'] ?? ACCENTS.lima;
+    const active = this.state.slide % OFFERS.length;
+    const query = this.state.query.trim().toLowerCase();
+    const ids = Object.keys(this.state.cart);
+
+    const results = PRODUCTS
+      .filter((p) => (p.name + ' ' + p.cat + ' ' + p.spec).toLowerCase().includes(query))
+      .map((p) => this.decorate(p));
+
+    const cartItems = ids.map((id) => {
+      const product = PRODUCTS.find((p) => p.id === id);
+      const qty = this.state.cart[id];
+
+      return {
+        id: id,
+        name: product.name,
+        qty: qty,
+        lineTotal: formatCents(product.price * qty),
+        inc: () => this.setQty(id, qty + 1),
+        dec: () => this.setQty(id, qty - 1),
+      };
+    });
+
+    const subtotal = ids.reduce((sum, id) => sum + PRODUCTS.find((p) => p.id === id).price * this.state.cart[id], 0);
+    const count = ids.reduce((sum, id) => sum + this.state.cart[id], 0);
+    const s = this.state.seconds;
+
+    return {
+      theme: theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      accent: pair.accent,
+      onAccent: pair.on,
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+
+      slide: this.decorate(OFFERS[active]),
+      slides: OFFERS.map((p, i) => ({
+        name: p.name,
+        w: i === active ? '26px' : '12px',
+        bg: i === active ? 'var(--fg)' : 'var(--border)',
+        go: () => this.goSlide(i),
+      })),
+      slideAnim: active % 2 === 0 ? 'sl-a' : 'sl-b',
+      photoAnim: active % 2 === 0 ? 'ph-a' : 'ph-b',
+
+      grid: PRODUCTS.map((p) => this.decorate(p)),
+      totalLabel: PRODUCTS.length + ' productos',
+      offerCount: OFFERS.length + ' productos',
+      countdown: pad(Math.floor(s / 3600)) + ':' + pad(Math.floor((s % 3600) / 60)) + ':' + pad(s % 60),
+
+      searchOpen: this.state.searchOpen,
+      openSearch: () => this.setState({ searchOpen: true }),
+      closeSearch: () => this.setState({ searchOpen: false, query: '' }),
+      query: this.state.query,
+      onQuery: (event) => this.setState({ query: event.target.value }),
+      results: results,
+      noResults: results.length === 0,
+
+      cartOpen: this.state.cartOpen,
+      openCart: () => this.setState({ cartOpen: true }),
+      closeCart: () => this.setState({ cartOpen: false }),
+      cartItems: cartItems,
+      cartCount: count,
+      hasItems: count > 0,
+      cartEmpty: count === 0,
+      subtotal: formatCents(subtotal),
+      bumpClass: this.state.bump ? 'bump' : '',
+    };
+  }
+}
+</script>
+</body>
+</html>

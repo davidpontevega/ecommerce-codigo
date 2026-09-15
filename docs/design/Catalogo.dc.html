@@ -1,0 +1,513 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: "Geist", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: var(--fg); text-decoration: none; }
+    a:hover { color: var(--muted-fg); }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    input, select { font: inherit; }
+
+    [data-theme="light"] {
+      --page: linear-gradient(155deg, oklch(0.965 0.008 210) 0%, oklch(0.972 0.012 150) 52%, oklch(0.955 0.018 118) 100%);
+      --fg: oklch(0.17 0.006 150);
+      --card: oklch(0.995 0.003 150);
+      --sunk: oklch(0.955 0.008 150);
+      --muted-fg: oklch(0.53 0.008 150);
+      --border: oklch(0.895 0.006 150);
+      --overlay: oklch(0.17 0.006 150 / 40%);
+      --shadow: 0 1px 2px oklch(0.17 0 0 / 3%), 0 10px 30px oklch(0.17 0 0 / 5%);
+      --shadow-lg: 0 2px 6px oklch(0.17 0 0 / 5%), 0 20px 48px oklch(0.17 0 0 / 9%);
+    }
+    [data-theme="dark"] {
+      --page: linear-gradient(155deg, oklch(0.19 0.008 210) 0%, oklch(0.17 0.01 150) 52%, oklch(0.155 0.014 118) 100%);
+      --fg: oklch(0.985 0 0);
+      --card: oklch(0.225 0.006 150);
+      --sunk: oklch(0.27 0.006 150);
+      --muted-fg: oklch(0.7 0.006 150);
+      --border: oklch(1 0 0 / 9%);
+      --overlay: oklch(0 0 0 / 60%);
+      --shadow: 0 1px 2px oklch(0 0 0 / 30%), 0 10px 30px oklch(0 0 0 / 34%);
+      --shadow-lg: 0 2px 6px oklch(0 0 0 / 34%), 0 20px 48px oklch(0 0 0 / 46%);
+    }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slide-right { from { transform: translateX(100%); } to { transform: none; } }
+    @keyframes pop { 0% { transform: scale(1); } 42% { transform: scale(1.32); } 100% { transform: scale(1); } }
+    /* Alternan para reiniciar la entrada de la grilla cuando cambia el filtro. */
+    @keyframes gr-a { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes gr-b { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    .rise { animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .fade { animation: fade 0.22s ease-out both; }
+    .slide-right { animation: slide-right 0.38s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .bump { animation: pop 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+    .gr-a { animation: gr-a 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .gr-b { animation: gr-b 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+    .card { border-radius: 28px; background: var(--card); box-shadow: var(--shadow); }
+    .lift { transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease; }
+    .lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .lift:hover .zoom { transform: scale(1.06); }
+    .zoom { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+    .circ { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--sunk); color: var(--fg); transition: background-color 0.2s ease, transform 0.14s ease; }
+    .circ:hover { background: color-mix(in oklch, var(--sunk), var(--fg) 8%); }
+    .circ:active { transform: scale(0.94); }
+    .circ-dark { background: var(--fg); color: var(--card); }
+    .circ-dark:hover { background: color-mix(in oklch, var(--fg), var(--muted-fg) 22%); }
+
+    .pill { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; font-weight: 500; transition: background-color 0.2s ease, transform 0.14s ease; }
+    .pill:active { transform: scale(0.985); }
+    .pill-accent { background: var(--accent); color: var(--on-accent); }
+    .pill-quiet { background: var(--sunk); color: var(--fg); }
+    .pill-quiet:hover { background: color-mix(in oklch, var(--sunk), var(--fg) 8%); }
+    .pill:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Chip de filtro: seleccionado invierte a tinta, no a acento, para que el
+       acento quede reservado a la acción principal. */
+    .chip { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--sunk); color: var(--muted-fg); font-size: 13px; font-weight: 500; transition: background-color 0.18s ease, color 0.18s ease, transform 0.14s ease; }
+    .chip:hover { color: var(--fg); }
+    .chip:active { transform: scale(0.96); }
+    .chip-on { background: var(--fg); color: var(--card); }
+    .chip-on:hover { color: var(--card); }
+
+    .sect { font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+    .scroller { overflow-y: auto; scrollbar-width: none; }
+    .scroller::-webkit-scrollbar { display: none; }
+    .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    input:focus, select:focus { outline: none; }
+  </style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="--accent: {{ accent }}; --on-accent: {{ onAccent }}; position: relative; width: 1440px; height: 900px; overflow: hidden; background: var(--page); color: var(--fg); font-size: 15px; line-height: 1.5">
+
+  <div style="display: flex; flex-direction: column; gap: 20px; height: 100%; padding: 32px">
+
+    <!-- ── Nav ────────────────────────────────────────────────── -->
+    <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0">
+      <div class="card" style="display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 24px; border-radius: 999px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="6" stroke="currentColor" stroke-width="1.7" />
+          <path d="M8 15.5l3.4-7 3.4 7M9.4 13h4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.03em">tech.</span>
+      </div>
+
+      <div class="card" style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 560px; height: 60px; padding: 0 8px 0 22px; border-radius: 999px">
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Buscar productos…" style="flex: 1; border: 0; background: transparent; color: var(--fg); font-size: 14.5px">
+        <span class="circ circ-dark" aria-hidden="true" style="width: 44px; height: 44px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9" /><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></svg>
+        </span>
+      </div>
+
+      <div class="card" style="display: flex; align-items: center; gap: 4px; height: 60px; margin-left: auto; padding: 0 8px; border-radius: 999px">
+        <button class="circ" onClick="{{ openCart }}" aria-label="Abrir carrito" style="position: relative">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 8h11l-1 11.5a1.6 1.6 0 0 1-1.6 1.5H9.1a1.6 1.6 0 0 1-1.6-1.5L6.5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9.5 9.5V7a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+            <span class="mono {{ bumpClass }}" style="position: absolute; top: -1px; right: -1px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 10.5px; font-weight: 600; line-height: 19px">{{ cartCount }}</span>
+          </sc-if>
+        </button>
+        <button class="circ" aria-label="Favoritos">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-7.5-4.4-7.5-9.4A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7.5 2.6c0 5-7.5 9.4-7.5 9.4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+        </button>
+        <button class="circ" onClick="{{ toggleTheme }}" aria-label="Cambiar tema">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8" /><path d="M12 3.2v2M12 18.8v2M3.2 12h2M18.8 12h2M5.9 5.9l1.4 1.4M16.7 16.7l1.4 1.4M18.1 5.9l-1.4 1.4M7.3 16.7l-1.4 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          </sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4 8.4 8.4 0 1 0 20 14.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+          </sc-if>
+        </button>
+        <button class="pill pill-quiet" style="height: 44px; padding: 0 8px 0 16px; font-size: 14px">
+          Ingresar
+          <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--card); color: var(--fg)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.5" r="3.4" stroke="currentColor" stroke-width="1.9" /><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; flex: 1; min-height: 0">
+
+      <!-- ── Filtros ──────────────────────────────────────────── -->
+      <aside class="card rise scroller" style="width: 300px; flex-shrink: 0; padding: 26px 24px">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.025em">Filtros</span>
+          <sc-if value="{{ hasFilters }}" hint-placeholder-val="{{ true }}">
+            <button class="pill pill-quiet" onClick="{{ clearAll }}" style="height: 32px; padding: 0 13px; font-size: 12.5px; color: var(--muted-fg)">Limpiar</button>
+          </sc-if>
+        </div>
+
+        <div class="sect" style="margin: 26px 0 12px">Categoría</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{ catFilters }}" as="c" hint-placeholder-count="5">
+            <button class="chip {{ c.on }}" onClick="{{ c.toggle }}">{{ c.name }}</button>
+          </sc-for>
+        </div>
+
+        <div class="sect" style="margin: 26px 0 12px">Precio</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{ priceFilters }}" as="r" hint-placeholder-count="5">
+            <button class="chip {{ r.on }}" onClick="{{ r.pick }}">{{ r.label }}</button>
+          </sc-for>
+        </div>
+
+        <div class="sect" style="margin: 26px 0 12px">Marca</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{ brandFilters }}" as="b" hint-placeholder-count="7">
+            <button class="chip {{ b.on }}" onClick="{{ b.toggle }}">{{ b.name }}</button>
+          </sc-for>
+        </div>
+
+        <div class="sect" style="margin: 26px 0 12px">Disponibilidad</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <button class="chip {{ stockOn }}" onClick="{{ toggleStock }}">Con stock</button>
+          <button class="chip {{ dealsOn }}" onClick="{{ toggleDeals }}">En oferta</button>
+        </div>
+      </aside>
+
+      <!-- ── Resultados ───────────────────────────────────────── -->
+      <main class="scroller" style="flex: 1; min-width: 0; padding-right: 4px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 4px 4px 20px">
+          <div>
+            <h1 style="margin: 0; font-size: 30px; letter-spacing: -0.035em; font-weight: 600">Catálogo</h1>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: var(--muted-fg)">{{ resultLabel }}</p>
+          </div>
+          <div class="card" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px; border-radius: 999px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--muted-fg)" aria-hidden="true"><path d="M7 5v14M4 16l3 3 3-3M17 19V5M14 8l3-3 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <select value="{{ sort }}" onChange="{{ onSort }}" style="border: 0; background: transparent; color: var(--fg); font-size: 13.5px">
+              <option value="relevance">Orden del catálogo</option>
+              <option value="price-asc">Menor precio</option>
+              <option value="price-desc">Mayor precio</option>
+              <option value="discount">Mayor descuento</option>
+            </select>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div class="{{ gridAnim }}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+            <sc-for list="{{ results }}" as="p" hint-placeholder-count="6">
+              <article class="card lift" style="display: flex; flex-direction: column; padding: 12px">
+                <div style="position: relative; height: 196px; border-radius: 20px; overflow: hidden; background: var(--sunk); opacity: {{ p.artOpacity }}">
+                  <div class="zoom" style="width: 100%; height: 100%">
+                    <dc-import name="Photo" pid="{{ p.id }}" label="{{ p.name }}" hint-size="100%,196px"></dc-import>
+                  </div>
+                  <sc-if value="{{ p.hasOffer }}" hint-placeholder-val="{{ true }}">
+                    <span class="mono" style="position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; height: 27px; padding: 0 11px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 11.5px; font-weight: 600">{{ p.off }}</span>
+                  </sc-if>
+                </div>
+
+                <div style="padding: 16px 8px 6px">
+                  <div style="font-size: 15px; font-weight: 500; line-height: 1.3; text-wrap: pretty">{{ p.name }}</div>
+                  <div style="margin-top: 3px; font-size: 12.5px; color: var(--muted-fg)">{{ p.spec }}</div>
+
+                  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 16px">
+                    <div>
+                      <div style="font-size: 11.5px; color: var(--muted-fg)">{{ p.stockNote }}</div>
+                      <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 2px">
+                        <span class="mono" style="font-size: 19px; font-weight: 600; letter-spacing: -0.025em">{{ p.price }}</span>
+                        <span class="mono" style="font-size: 12px; color: var(--muted-fg); text-decoration: line-through">{{ p.compare }}</span>
+                      </div>
+                    </div>
+                    <button class="circ circ-dark" onClick="{{ p.add }}" disabled="{{ p.soldOut }}" aria-label="Agregar {{ p.name }}" style="width: 40px; height: 40px">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div class="card" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 88px 40px; text-align: center">
+            <div class="circ" style="width: 56px; height: 56px; color: var(--muted-fg)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" /><path d="M16.5 16.5L21 21M8.5 11h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            </div>
+            <div style="margin-top: 8px; font-size: 16px; font-weight: 500">Nada con estos filtros</div>
+            <button class="pill pill-quiet" onClick="{{ clearAll }}" style="height: 44px; margin-top: 10px; padding: 0 20px; font-size: 14px">Limpiar filtros</button>
+          </div>
+        </sc-if>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── Carrito ──────────────────────────────────────────────── -->
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="fade" style="position: absolute; inset: 0; z-index: 60; background: var(--overlay)" onClick="{{ closeCart }}"></div>
+  </sc-if>
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <aside class="slide-right" style="position: absolute; top: 20px; right: 20px; bottom: 20px; z-index: 61; display: flex; flex-direction: column; width: 420px; border-radius: 28px; background: var(--card); box-shadow: var(--shadow-lg); overflow: hidden">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 24px 22px 16px">
+        <div style="font-size: 18px; font-weight: 600; letter-spacing: -0.025em">Carrito <span class="mono" style="color: var(--muted-fg); font-weight: 400">{{ cartCount }}</span></div>
+        <button class="circ" onClick="{{ closeCart }}" aria-label="Cerrar" style="width: 40px; height: 40px">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+
+      <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+        <div class="scroller" style="flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 0 14px">
+          <sc-for list="{{ cartItems }}" as="it" hint-placeholder-count="2">
+            <div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; padding: 8px; border-radius: 20px; background: var(--sunk)">
+              <div style="height: 64px; border-radius: 16px; overflow: hidden">
+                <dc-import name="Photo" pid="{{ it.id }}" label="{{ it.name }}" hint-size="100%,64px"></dc-import>
+              </div>
+              <div style="min-width: 0; padding-right: 8px">
+                <div style="font-size: 14px; font-weight: 500; line-height: 1.3">{{ it.name }}</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px">
+                  <div style="display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card)">
+                    <button class="circ" onClick="{{ it.dec }}" aria-label="Quitar uno" style="width: 26px; height: 26px; background: transparent">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                    </button>
+                    <span class="mono" style="min-width: 20px; text-align: center; font-size: 13px">{{ it.qty }}</span>
+                    <button class="circ" onClick="{{ it.inc }}" aria-label="Agregar uno" style="width: 26px; height: 26px; background: transparent">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+                    </button>
+                  </div>
+                  <span class="mono" style="font-size: 14px; font-weight: 500">{{ it.lineTotal }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding: 18px 22px 22px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between">
+            <span style="font-size: 14px; color: var(--muted-fg)">Total</span>
+            <span class="mono" style="font-size: 24px; font-weight: 600; letter-spacing: -0.03em">{{ subtotal }}</span>
+          </div>
+          <button class="pill pill-accent" style="width: 100%; height: 52px; margin-top: 16px; font-size: 15px">Ir a pagar</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px">
+          <div class="circ" style="width: 56px; height: 56px; color: var(--muted-fg)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 8h11l-1 11.5a1.6 1.6 0 0 1-1.6 1.5H9.1a1.6 1.6 0 0 1-1.6-1.5L6.5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M9.5 9.5V7a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+          </div>
+          <div style="font-size: 15px; font-weight: 500">Todavía no hay nada acá</div>
+          <button class="pill pill-quiet" onClick="{{ closeCart }}" style="height: 42px; margin-top: 6px; padding: 0 18px; font-size: 14px">Seguir viendo</button>
+        </div>
+      </sc-if>
+    </aside>
+  </sc-if>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Tema"},"acento":{"editor":"enum","options":["lima","electrico","violeta","coral"],"default":"lima","section":"Tema"}}'>
+// Par acento / texto sobre el acento: el contraste no se puede calcular en CSS,
+// así que cada opción trae su color de texto.
+const ACCENTS = {
+  lima: { accent: '#d7f24a', on: '#12160a' },
+  electrico: { accent: '#2b6bff', on: '#ffffff' },
+  violeta: { accent: '#7c4dff', on: '#ffffff' },
+  coral: { accent: '#ff6b4a', on: '#180a06' },
+};
+
+const PRODUCTS = [
+  { id: 'xps13', name: 'Dell XPS 13', brand: 'Dell', cat: 'Laptops', price: 549900, compare: 599900, stock: 12, spec: 'Core i7 · 16 GB · 512 GB' },
+  { id: 'ideapad', name: 'Lenovo IdeaPad Gaming 3', brand: 'Lenovo', cat: 'Laptops', price: 399900, compare: null, stock: 7, spec: 'Ryzen 7 · RTX 3050 · 120 Hz' },
+  { id: 'k2', name: 'Keychron K2', brand: 'Keychron', cat: 'Teclados', price: 42900, compare: 49900, stock: 30, spec: '75% · switch marrón' },
+  { id: 'mxkeys', name: 'Logitech MX Keys', brand: 'Logitech', cat: 'Teclados', price: 39900, compare: null, stock: 0, spec: 'Bajo perfil · multidispositivo' },
+  { id: 'ug27', name: 'LG UltraGear 27"', brand: 'LG', cat: 'Monitores', price: 129900, compare: 149900, stock: 9, spec: 'QHD · 165 Hz · 1 ms' },
+  { id: 'xm5', name: 'Sony WH-1000XM5', brand: 'Sony', cat: 'Audio', price: 179900, compare: null, stock: 15, spec: 'ANC · 30 h de batería' },
+  { id: '980pro', name: 'Samsung 980 Pro 1TB', brand: 'Samsung', cat: 'Almacenamiento', price: 49900, compare: 59900, stock: 25, spec: 'NVMe PCIe 4.0 · 7000 MB/s' },
+];
+
+const CATEGORIES = ['Laptops', 'Teclados', 'Monitores', 'Audio', 'Almacenamiento'];
+const BRANDS = ['Dell', 'Keychron', 'LG', 'Lenovo', 'Logitech', 'Samsung', 'Sony'];
+
+// Rangos en centavos: los mismos enteros que guarda products.price_cents.
+const PRICE_RANGES = [
+  { id: 'all', label: 'Todos', min: 0, max: Infinity },
+  { id: 'lt500', label: '< S/ 500', min: 0, max: 50000 },
+  { id: '500-1500', label: 'S/ 500 – 1.500', min: 50000, max: 150000 },
+  { id: '1500-4000', label: 'S/ 1.500 – 4.000', min: 150000, max: 400000 },
+  { id: 'gt4000', label: '> S/ 4.000', min: 400000, max: Infinity },
+];
+
+// Espejo de src/lib/format.ts: centavos enteros, agrupación con punto y coma decimal.
+function formatCents(cents) {
+  const abs = Math.abs(cents);
+  const fraction = String(abs % 100).padStart(2, '0');
+  const whole = new Intl.NumberFormat('es-ES', { useGrouping: true, maximumFractionDigits: 0 }).format((abs - (abs % 100)) / 100);
+
+  return 'S/ ' + (cents < 0 ? '-' : '') + whole + ',' + fraction;
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      theme: null,
+      cats: [],
+      brands: [],
+      range: 'all',
+      onlyStock: false,
+      onlyDeals: false,
+      sort: 'relevance',
+      query: '',
+      cart: {},
+      cartOpen: false,
+      bump: false,
+    };
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.bumpTimer);
+  }
+
+  toggleIn(key, value) {
+    const list = this.state[key];
+    const next = list.includes(value) ? list.filter((v) => v !== value) : list.concat([value]);
+    this.setState({ [key]: next });
+  }
+
+  add(id) {
+    const cart = Object.assign({}, this.state.cart);
+    cart[id] = (cart[id] ?? 0) + 1;
+    this.setState({ cart: cart, bump: true });
+    clearTimeout(this.bumpTimer);
+    this.bumpTimer = setTimeout(() => this.setState({ bump: false }), 460);
+  }
+
+  setQty(id, next) {
+    const cart = Object.assign({}, this.state.cart);
+    if (next <= 0) {
+      delete cart[id];
+    } else {
+      cart[id] = next;
+    }
+    this.setState({ cart: cart });
+  }
+
+  matches(p) {
+    const s = this.state;
+    const range = PRICE_RANGES.find((r) => r.id === s.range);
+    const q = s.query.trim().toLowerCase();
+
+    if (s.cats.length > 0 && !s.cats.includes(p.cat)) return false;
+    if (s.brands.length > 0 && !s.brands.includes(p.brand)) return false;
+    if (p.price < range.min || p.price > range.max) return false;
+    if (s.onlyStock && p.stock === 0) return false;
+    if (s.onlyDeals && p.compare === null) return false;
+    if (q !== '' && !(p.name + ' ' + p.cat + ' ' + p.spec + ' ' + p.brand).toLowerCase().includes(q)) return false;
+
+    return true;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const theme = s.theme ?? this.props.theme ?? 'light';
+    const pair = ACCENTS[this.props.acento ?? 'lima'] ?? ACCENTS.lima;
+
+    const sorted = PRODUCTS.filter((p) => this.matches(p));
+
+    if (s.sort === 'price-asc') sorted.sort((a, b) => a.price - b.price);
+    if (s.sort === 'price-desc') sorted.sort((a, b) => b.price - a.price);
+    if (s.sort === 'discount') {
+      sorted.sort((a, b) => (b.compare ? 1 - b.price / b.compare : 0) - (a.compare ? 1 - a.price / a.compare : 0));
+    }
+
+    const results = sorted.map((p) => ({
+      id: p.id,
+      name: p.name,
+      spec: p.spec,
+      price: formatCents(p.price),
+      compare: p.compare === null ? '' : formatCents(p.compare),
+      hasOffer: p.compare !== null,
+      off: p.compare === null ? '' : '-' + Math.round((1 - p.price / p.compare) * 100) + ' %',
+      soldOut: p.stock === 0,
+      artOpacity: p.stock === 0 ? '0.45' : '1',
+      stockNote: p.stock === 0 ? 'Agotado' : p.stock + ' en stock',
+      add: () => this.add(p.id),
+    }));
+
+    const filterCount = s.cats.length + s.brands.length + (s.range === 'all' ? 0 : 1) + (s.onlyStock ? 1 : 0) + (s.onlyDeals ? 1 : 0) + (s.query.trim() === '' ? 0 : 1);
+
+    const ids = Object.keys(s.cart);
+    const cartItems = ids.map((id) => {
+      const product = PRODUCTS.find((p) => p.id === id);
+      const qty = s.cart[id];
+
+      return {
+        id: id,
+        name: product.name,
+        qty: qty,
+        lineTotal: formatCents(product.price * qty),
+        inc: () => this.setQty(id, qty + 1),
+        dec: () => this.setQty(id, qty - 1),
+      };
+    });
+    const count = ids.reduce((sum, id) => sum + s.cart[id], 0);
+    const subtotal = ids.reduce((sum, id) => sum + PRODUCTS.find((p) => p.id === id).price * s.cart[id], 0);
+
+    return {
+      theme: theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      accent: pair.accent,
+      onAccent: pair.on,
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+
+      catFilters: CATEGORIES.map((name) => ({
+        name: name,
+        on: s.cats.includes(name) ? 'chip-on' : '',
+        toggle: () => this.toggleIn('cats', name),
+      })),
+      brandFilters: BRANDS.map((name) => ({
+        name: name,
+        on: s.brands.includes(name) ? 'chip-on' : '',
+        toggle: () => this.toggleIn('brands', name),
+      })),
+      priceFilters: PRICE_RANGES.map((r) => ({
+        label: r.label,
+        on: s.range === r.id ? 'chip-on' : '',
+        pick: () => this.setState({ range: r.id }),
+      })),
+      stockOn: s.onlyStock ? 'chip-on' : '',
+      dealsOn: s.onlyDeals ? 'chip-on' : '',
+      toggleStock: () => this.setState({ onlyStock: !s.onlyStock }),
+      toggleDeals: () => this.setState({ onlyDeals: !s.onlyDeals }),
+
+      query: s.query,
+      onQuery: (event) => this.setState({ query: event.target.value }),
+      sort: s.sort,
+      onSort: (event) => this.setState({ sort: event.target.value }),
+
+      hasFilters: filterCount > 0,
+      clearAll: () => this.setState({ cats: [], brands: [], range: 'all', onlyStock: false, onlyDeals: false, query: '' }),
+
+      results: results,
+      hasResults: results.length > 0,
+      noResults: results.length === 0,
+      // El nombre de la animación alterna con la cantidad de resultados para que
+      // la grilla vuelva a entrar cuando cambia el filtro.
+      gridAnim: results.length % 2 === 0 ? 'gr-a' : 'gr-b',
+      resultLabel: results.length + ' de ' + PRODUCTS.length + ' productos',
+
+      openCart: () => this.setState({ cartOpen: true }),
+      closeCart: () => this.setState({ cartOpen: false }),
+      cartOpen: s.cartOpen,
+      cartItems: cartItems,
+      cartCount: count,
+      hasItems: count > 0,
+      cartEmpty: count === 0,
+      subtotal: formatCents(subtotal),
+      bumpClass: s.bump ? 'bump' : '',
+    };
+  }
+}
+</script>
+</body>
+</html>
