@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { authErrorResponse, requireAuth } from "@/lib/auth";
+import { getAppUrl } from "@/lib/env";
 import { stripe } from "@/lib/stripe";
 import { CURRENCY } from "@/server/services/checkout.service";
 import { ensureStripeCustomer } from "@/server/services/payment-method.service";
 
 // Del entorno, nunca de un header de la request: un `Host` falsificado convertiría
 // la URL de retorno en un redirect abierto.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = getAppUrl();
 
 /**
  * Alta de tarjeta con el Checkout alojado en `mode: "setup"` (D3): aquí no se

@@ -1,5 +1,7 @@
 import axios, { AxiosError } from "axios";
 
+import { getAppUrl } from "@/lib/env";
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -10,9 +12,7 @@ export class ApiError extends Error {
   }
 }
 
-const baseURL = process.env.NEXT_PUBLIC_APP_URL
-  ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
-  : "/api";
+const baseURL = process.env.NEXT_PUBLIC_APP_URL ? `${getAppUrl()}/api` : "/api";
 
 export const api = axios.create({ baseURL });
 

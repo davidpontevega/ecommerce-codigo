@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
+import { getAppUrl } from "@/lib/env";
 import { CheckoutUnavailableError } from "@/lib/errors";
 import { stripe } from "@/lib/stripe";
 import { checkoutSessionSchema } from "@/modules/checkout/schemas/checkout.schema";
@@ -9,7 +10,7 @@ import { createPendingOrder } from "@/server/services/checkout.service";
 
 // Del entorno, nunca de un header de la request: un `Host` falsificado convertiría
 // la URL de retorno en un redirect abierto.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = getAppUrl();
 
 const SESSION_TTL_SECONDS = 60 * 30;
 
