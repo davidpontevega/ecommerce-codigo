@@ -1,4 +1,4 @@
-import { FolderTree, Package, ShieldCheck, Users } from "lucide-react";
+import { FolderTree, Package, Receipt, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 
 import { getCurrentUser } from "@/lib/auth";
@@ -23,6 +23,12 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/admin/products",
     icon: Package,
     permission: "products.read",
+  },
+  {
+    label: "Pedidos",
+    href: "/admin/orders",
+    icon: Receipt,
+    permission: "orders.read",
   },
   {
     label: "Usuarios",

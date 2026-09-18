@@ -1,5 +1,22 @@
-import { and, desc, eq, gte, inArray, lt, ne, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gte,
+  ilike,
+  inArray,
+  lt,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 
+import { endOfLimaDay, startOfLimaDay } from "@/lib/utils";
+import type { AdminOrdersQueryInput } from "@/modules/orders-admin/schemas/admin-order.schema";
 import { db, type Database, type Transaction } from "@/server/db";
 import type {
   NewOrder,
@@ -7,7 +24,7 @@ import type {
   Order,
   OrderItem,
 } from "@/server/db/schema";
-import { orderItems, orders } from "@/server/db/schema";
+import { orderItems, orders, users } from "@/server/db/schema";
 
 /** Las líneas se insertan con el `order_id` del pedido recién creado. */
 export type PendingOrderItem = Omit<NewOrderItem, "id" | "orderId">;
@@ -196,6 +213,126 @@ export async function findByIdForUser(
     .select()
     .from(orders)
     .where(and(eq(orders.id, id), eq(orders.userId, userId)))
+    .limit(1);
+
+  return order ?? null;
+}
+
+/* ---------------------------------------------------------------- panel ---
+ * Lectura del panel (spec 014): sin scoping a usuario, con el titular ya
+ * resuelto. `listByUser` no vale aquí justamente por ese scoping.
+ */
+
+export type AdminOrderRow = Order & {
+  customerName: string | null;
+  customerEmail: string | null;
+  itemCount: number;
+};
+
+export type AdminOrderListResult = {
+  data: AdminOrderRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+const customerJoin = eq(users.id, orders.userId);
+
+const adminOrderSelection = {
+  ...getTableColumns(orders),
+  // `nullif`: un usuario sin nombre ni apellido deja la celda vacía, no " ".
+  customerName: sql<
+    string | null
+  >`nullif(btrim(concat_ws(' ', ${users.firstName}, ${users.lastName})), '')`,
+  // El invitado solo tiene `orders.email` (lo copia el webhook, spec 011); el
+  // pedido con sesión puede tenerlo nulo hasta entonces y cae al del usuario.
+  customerEmail: sql<string | null>`coalesce(${orders.email}, ${users.email})`,
+  // Subconsulta correlacionada sobre `order_items_order_id_idx`: evita una 2ª
+  // consulta solo para contar líneas de la página.
+  itemCount: sql<number>`(select count(*)::int from ${orderItems} where ${orderItems.orderId} = ${orders.id})`,
+};
+
+const adminSortColumns = {
+  createdAt: orders.createdAt,
+  totalCents: orders.totalCents,
+} as const;
+
+/**
+ * `from`/`to` llegan como días locales de Lima; `to` es **inclusivo** para quien
+ * filtra, así que se corta al empezar el día siguiente (mismo criterio que la
+ * spec 012). Sin estados seleccionados no se filtra por estado: son todos.
+ */
+export function buildAdminFilters(
+  params: AdminOrdersQueryInput,
+): SQL | undefined {
+  const conditions: Array<SQL | undefined> = [];
+
+  if (params.from) {
+    conditions.push(gte(orders.createdAt, startOfLimaDay(params.from)));
+  }
+
+  if (params.to) {
+    conditions.push(lt(orders.createdAt, endOfLimaDay(params.to)));
+  }
+
+  if (params.status?.length) {
+    conditions.push(inArray(orders.status, params.status));
+  }
+
+  if (params.search) {
+    const pattern = `%${params.search}%`;
+    conditions.push(
+      or(
+        ilike(orders.email, pattern),
+        ilike(users.firstName, pattern),
+        ilike(users.lastName, pattern),
+      ),
+    );
+  }
+
+  return and(...conditions);
+}
+
+export async function listForAdmin(
+  params: AdminOrdersQueryInput,
+): Promise<AdminOrderListResult> {
+  const where = buildAdminFilters(params);
+  const column = adminSortColumns[params.sortBy];
+  const orderBy = params.sortDir === "asc" ? asc(column) : desc(column);
+
+  const [rows, totals] = await Promise.all([
+    db
+      .select(adminOrderSelection)
+      .from(orders)
+      .leftJoin(users, customerJoin)
+      .where(where)
+      .orderBy(orderBy)
+      .limit(params.pageSize)
+      .offset((params.page - 1) * params.pageSize),
+    db
+      .select({ value: count() })
+      .from(orders)
+      .leftJoin(users, customerJoin)
+      .where(where),
+  ]);
+
+  return {
+    data: rows,
+    total: totals[0]?.value ?? 0,
+    page: params.page,
+    pageSize: params.pageSize,
+  };
+}
+
+/** Sin scoping a usuario: el permiso `orders.read` ya lo comprobó el handler. */
+export async function findByIdForAdmin(
+  id: string,
+): Promise<AdminOrderRow | null> {
+  const [order] = await db
+    .select(adminOrderSelection)
+    .from(orders)
+    .leftJoin(users, customerJoin)
+    .where(eq(orders.id, id))
     .limit(1);
 
   return order ?? null;

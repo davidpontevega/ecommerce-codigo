@@ -50,6 +50,11 @@ type DataTableProps<TData extends RowData> = {
   isError: boolean;
   onRetry: () => void;
   emptyMessage: string;
+  /**
+   * Atajo de ratón: la fila que lo usa debe ofrecer además un enlace enfocable
+   * en alguna celda, porque un `onClick` en el `<tr>` no llega por teclado.
+   */
+  onRowClick?: (row: TData) => void;
 };
 
 const SKELETON_ROWS = 5;
@@ -66,6 +71,7 @@ export function DataTable<TData extends RowData>({
   isError,
   onRetry,
   emptyMessage,
+  onRowClick,
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
@@ -162,7 +168,13 @@ export function DataTable<TData extends RowData>({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
+                  }
+                  className={onRowClick ? "cursor-pointer" : undefined}
+                >
                   {row.getAllCells().map((cell) => (
                     <TableCell key={cell.id}>
                       <table.FlexRender cell={cell} />

@@ -18,6 +18,23 @@ export function formatPrice(cents: number): string {
   return priceFormatter.format(cents / 100)
 }
 
+/** Perú no usa horario de verano: el offset es constante todo el año. */
+const LIMA_OFFSET = "-05:00"
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Instante en que empieza ese día (`YYYY-MM-DD`) en Lima. */
+export function startOfLimaDay(day: string): Date {
+  return new Date(`${day}T00:00:00${LIMA_OFFSET}`)
+}
+
+/**
+ * Fin **exclusivo** de un `to` inclusivo para quien filtra: el pedido de las
+ * 23:59 de ese día entra, el del día siguiente no.
+ */
+export function endOfLimaDay(day: string): Date {
+  return new Date(startOfLimaDay(day).getTime() + DAY_MS)
+}
+
 /** Mismo texto de stock en tarjeta, ficha y buscador. */
 export function stockNote(stock: number): string {
   return stock > 0 ? `${stock} en stock` : "Agotado"

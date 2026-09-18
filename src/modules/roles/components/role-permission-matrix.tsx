@@ -22,6 +22,7 @@ const RESOURCE_LABELS: Record<string, string> = {
   categories: "Categorías",
   products: "Productos",
   users: "Usuarios",
+  orders: "Pedidos",
   roles: "Roles y permisos",
   audit: "Bitácora de auditoría",
 };

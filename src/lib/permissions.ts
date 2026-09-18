@@ -68,6 +68,11 @@ export const PERMISSIONS = {
     action: "assign_roles",
     description: "Asignar y revocar roles de un usuario",
   },
+  "orders.read": {
+    resource: "orders",
+    action: "read",
+    description: "Ver el listado y el detalle de pedidos",
+  },
   "roles.read": {
     resource: "roles",
     action: "read",
