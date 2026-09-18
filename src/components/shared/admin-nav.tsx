@@ -1,4 +1,11 @@
-import { FolderTree, Package, Receipt, ShieldCheck, Users } from "lucide-react";
+import {
+  FolderTree,
+  LayoutDashboard,
+  Package,
+  Receipt,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 
 import { getCurrentUser } from "@/lib/auth";
@@ -12,6 +19,12 @@ type NavItem = {
 };
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
+  {
+    label: "Tablero",
+    href: "/admin",
+    icon: LayoutDashboard,
+    permission: "dashboard.read",
+  },
   {
     label: "Categorías",
     href: "/admin/categories",

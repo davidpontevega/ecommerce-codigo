@@ -78,7 +78,11 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
+  /* Serie del tablero (spec 015). El gris que traía shadcn no tiene croma: no
+     distingue una serie de una gridline. Azul validado contra la superficie de
+     la card (`--card`, blanco) con el validador de la skill `dataviz`: banda de
+     luminosidad, croma y contraste ≥ 3:1 en verde. */
+  --chart-1: #2a78d6;
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
@@ -132,7 +136,9 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
+  /* Paso propio para fondo oscuro, no el claro «invertido»: validado contra
+     `--card` oscuro con el mismo validador. */
+  --chart-1: #3987e5;
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);

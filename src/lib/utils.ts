@@ -35,6 +35,17 @@ export function endOfLimaDay(day: string): Date {
   return new Date(startOfLimaDay(day).getTime() + DAY_MS)
 }
 
+// `en-CA` formatea justo como `YYYY-MM-DD`, el mismo formato que consumen
+// `startOfLimaDay`/`endOfLimaDay`.
+const limaDayFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Lima",
+})
+
+/** El día local de Lima (`YYYY-MM-DD`) en el que cae ese instante. */
+export function limaDay(at: Date = new Date()): string {
+  return limaDayFormatter.format(at)
+}
+
 /** Mismo texto de stock en tarjeta, ficha y buscador. */
 export function stockNote(stock: number): string {
   return stock > 0 ? `${stock} en stock` : "Agotado"

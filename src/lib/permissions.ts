@@ -73,6 +73,11 @@ export const PERMISSIONS = {
     action: "read",
     description: "Ver el listado y el detalle de pedidos",
   },
+  "dashboard.read": {
+    resource: "dashboard",
+    action: "read",
+    description: "Ver el tablero de métricas del panel",
+  },
   "roles.read": {
     resource: "roles",
     action: "read",
