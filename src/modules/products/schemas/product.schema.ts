@@ -48,6 +48,9 @@ export const productQuerySchema = z.object({
   status: z.enum(["available", "deleted", "all"]).default("available"),
   minPriceCents: z.coerce.number().int().min(0).optional(),
   maxPriceCents: z.coerce.number().int().min(0).optional(),
+  // Tope de existencias para la vista de Inventario (spec 016): el toggle
+  // "solo stock bajo" lo fija al umbral. Ausente = sin filtro.
+  maxStock: z.coerce.number().int().min(0).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(productSortFields).default("createdAt"),
@@ -110,6 +113,14 @@ export const productUpdateSchema = productFields
 export const productIdSchema = z.uuid();
 
 export type ProductQueryInput = z.infer<typeof productQuerySchema>;
+
+/** Guarda el `sortBy` que llega de la cabecera de la tabla dentro del enum. */
+export function isProductSortField(
+  value: string,
+): value is ProductQueryInput["sortBy"] {
+  return (productSortFields as ReadonlyArray<string>).includes(value);
+}
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
 export type ProductFormValues = z.input<typeof productCreateSchema>;

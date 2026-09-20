@@ -177,6 +177,10 @@ export function buildFilters(params: ProductQueryInput): SQL | undefined {
     conditions.push(lte(products.priceCents, params.maxPriceCents));
   }
 
+  if (params.maxStock !== undefined) {
+    conditions.push(lte(products.stock, params.maxStock));
+  }
+
   return and(...conditions);
 }
 

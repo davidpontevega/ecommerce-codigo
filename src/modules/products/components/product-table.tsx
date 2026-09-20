@@ -32,7 +32,7 @@ import {
 } from "../hooks/use-product-mutations";
 import { useProducts } from "../hooks/use-products";
 import {
-  productSortFields,
+  isProductSortField,
   type ProductQueryInput,
 } from "../schemas/product.schema";
 import type { ProductDto } from "../types/product.types";
@@ -51,10 +51,6 @@ const statusOptions: ReadonlyArray<{ value: ProductStatus; label: string }> = [
 ];
 
 const EMPTY_ROWS: ProductDto[] = [];
-
-function isSortField(value: string): value is ProductSortField {
-  return (productSortFields as ReadonlyArray<string>).includes(value);
-}
 
 /** El input de precio está en centavos; vacío o no numérico es "sin filtro". */
 function toPriceCents(value: string): number | undefined {
@@ -93,7 +89,9 @@ export function ProductTable() {
 
   const activeSort = sorting[0];
   const sortBy: ProductSortField =
-    activeSort && isSortField(activeSort.id) ? activeSort.id : "createdAt";
+    activeSort && isProductSortField(activeSort.id)
+      ? activeSort.id
+      : "createdAt";
 
   const params: ProductQueryInput = {
     search: debouncedSearch.trim() || undefined,

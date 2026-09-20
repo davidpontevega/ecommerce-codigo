@@ -247,6 +247,26 @@ describe("buildFilters", () => {
     });
   });
 
+  // El toggle "solo stock bajo" de Inventario (spec 016) se apoya en esto.
+  test("caps the stock with maxStock", () => {
+    assert.deepEqual(whereFor({ maxStock: "5" }), {
+      sql: `(${NOT_DELETED} and "products"."stock" <= $1)`,
+      params: [5],
+    });
+  });
+
+  // Cero es un límite válido: `maxStock=0` debe dejar solo los agotados.
+  test("keeps a zero stock bound instead of dropping it", () => {
+    assert.deepEqual(whereFor({ maxStock: "0" }), {
+      sql: `(${NOT_DELETED} and "products"."stock" <= $1)`,
+      params: [0],
+    });
+  });
+
+  test("ignores maxStock when it is absent", () => {
+    assert.deepEqual(whereFor({}), { sql: NOT_DELETED, params: [] });
+  });
+
   test("combines every filter into a single conjunction", () => {
     const result = whereFor({
       search: "rtx",

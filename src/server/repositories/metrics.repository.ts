@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, gte, isNull, lt, lte, sql } from "drizzle-orm";
 
+import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
 import { endOfLimaDay, limaDay, startOfLimaDay } from "@/lib/utils";
 import type {
   DashboardMetrics,
@@ -13,12 +14,6 @@ import { orderItems, orderStatus, orders, products } from "@/server/db/schema";
 
 /** Ventana fija (spec 015 D3): sin selector de fechas en esta vuelta. */
 export const WINDOW_DAYS = 30;
-
-/**
- * Umbral fijo (spec 015 D4): es un aviso, no una configuración. Cuando exista
- * la sección Inventario, ahí se decide si pasa a ser por producto.
- */
-export const LOW_STOCK_THRESHOLD = 5;
 
 export const TOP_PRODUCTS_LIMIT = 5;
 export const LOW_STOCK_LIMIT = 5;

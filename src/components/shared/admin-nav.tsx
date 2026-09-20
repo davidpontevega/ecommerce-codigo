@@ -1,4 +1,5 @@
 import {
+  Boxes,
   FolderTree,
   LayoutDashboard,
   Package,
@@ -35,6 +36,12 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     label: "Productos",
     href: "/admin/products",
     icon: Package,
+    permission: "products.read",
+  },
+  {
+    label: "Inventario",
+    href: "/admin/inventory",
+    icon: Boxes,
     permission: "products.read",
   },
   {

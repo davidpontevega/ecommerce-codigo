@@ -17,7 +17,7 @@ export function LowStockList({ data }: Props) {
       {data.map((product) => (
         <li key={product.productId}>
           <Link
-            href="/admin/products"
+            href="/admin/inventory"
             className="hover:bg-muted flex items-center justify-between gap-3 rounded-md px-2 py-2 text-sm"
           >
             <span className="truncate">{product.name}</span>
