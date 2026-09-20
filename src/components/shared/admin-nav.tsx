@@ -6,6 +6,7 @@ import {
   Receipt,
   ShieldCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,6 +50,12 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/admin/orders",
     icon: Receipt,
     permission: "orders.read",
+  },
+  {
+    label: "Finanzas",
+    href: "/admin/finance",
+    icon: Wallet,
+    permission: "finance.manage",
   },
   {
     label: "Usuarios",

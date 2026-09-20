@@ -88,6 +88,13 @@ export const PERMISSIONS = {
     action: "update_permissions",
     description: "Cambiar los permisos que otorga un rol",
   },
+  // Permiso único (spec 017 D5): cubre ver el resumen de caja y el CRUD de
+  // gastos; separarlo en read/write no responde a ningún rol real del negocio.
+  "finance.manage": {
+    resource: "finance",
+    action: "manage",
+    description: "Ver el resumen de caja y administrar los gastos varios",
+  },
   "audit.read": {
     resource: "audit",
     action: "read",

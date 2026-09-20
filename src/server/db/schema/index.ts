@@ -1,5 +1,6 @@
 export * from "./audit-log";
 export * from "./category";
+export * from "./expense";
 export * from "./order";
 export * from "./order-item";
 export * from "./payment-method";

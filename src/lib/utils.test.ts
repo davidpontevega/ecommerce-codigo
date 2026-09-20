@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { discountPercent, formatPrice, stockNote } from "./utils";
+import {
+  discountPercent,
+  formatPrice,
+  limaMonthRange,
+  startOfLimaDay,
+  stockNote,
+} from "./utils";
 
 // `Intl.NumberFormat("es-PE")` separa el símbolo con espacio duro (U+00A0), no
 // con un espacio normal: las expectativas lo escriben explícito para no comparar
@@ -42,6 +48,38 @@ describe("discountPercent", () => {
   test("returns the rounded percentage when compareAtCents is higher than priceCents", () => {
     assert.equal(discountPercent(7500, 10000), 25);
     assert.equal(discountPercent(549900, 699900), 21);
+  });
+});
+
+describe("limaMonthRange", () => {
+  test("spans from the first of the month to the first of the next", () => {
+    assert.deepEqual(limaMonthRange("2026-09-20"), {
+      from: "2026-09-01",
+      to: "2026-10-01",
+    });
+  });
+
+  test("rolls the year over in December", () => {
+    assert.deepEqual(limaMonthRange("2026-12-31"), {
+      from: "2026-12-01",
+      to: "2027-01-01",
+    });
+  });
+
+  test("keeps the same window on the first and last day of the month", () => {
+    assert.deepEqual(limaMonthRange("2026-02-01"), limaMonthRange("2026-02-28"));
+  });
+
+  // AC2: un pedido del último día a las 23:00 de Lima cae dentro de la ventana
+  // y uno del día 1 del mes siguiente, fuera.
+  test("brackets the last instant of the month in Lima time", () => {
+    const { from, to } = limaMonthRange("2026-09-20");
+    const lastNight = new Date("2026-09-30T23:00:00-05:00");
+    const nextMonth = new Date("2026-10-01T00:30:00-05:00");
+
+    assert.ok(lastNight >= startOfLimaDay(from));
+    assert.ok(lastNight < startOfLimaDay(to));
+    assert.ok(nextMonth >= startOfLimaDay(to));
   });
 });
 

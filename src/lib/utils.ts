@@ -46,6 +46,27 @@ export function limaDay(at: Date = new Date()): string {
   return limaDayFormatter.format(at)
 }
 
+/**
+ * El mes calendario de Lima al que pertenece ese día, como `[from, to)`: `from`
+ * es su día 1 y `to` el día 1 del mes siguiente, ambos `YYYY-MM-DD`. Aritmética
+ * sobre el texto y no sobre `Date` porque el día ya viene resuelto en Lima.
+ */
+export function limaMonthRange(day: string = limaDay()): {
+  from: string
+  to: string
+} {
+  const year = Number(day.slice(0, 4))
+  const month = Number(day.slice(5, 7))
+  const isDecember = month === 12
+  const nextYear = isDecember ? year + 1 : year
+  const nextMonth = isDecember ? 1 : month + 1
+
+  return {
+    from: `${day.slice(0, 7)}-01`,
+    to: `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`,
+  }
+}
+
 /** Mismo texto de stock en tarjeta, ficha y buscador. */
 export function stockNote(stock: number): string {
   return stock > 0 ? `${stock} en stock` : "Agotado"

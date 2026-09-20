@@ -43,6 +43,13 @@
       "when": 1789143149865,
       "tag": "0005_fancy_prodigy",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789944811888,
+      "tag": "0006_panoramic_mattie_franklin",
+      "breakpoints": true
     }
   ]
 }
