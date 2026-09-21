@@ -1,6 +1,5 @@
-import { UserButton } from "@clerk/nextjs";
-
 import { Badge } from "@/components/ui/badge";
+import { AdminUserButton } from "@/components/shared/admin-user-button";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function AdminHeader() {
@@ -21,7 +20,7 @@ export async function AdminHeader() {
           </Badge>
         ))}
       </div>
-      <UserButton />
+      <AdminUserButton />
     </header>
   );
 }
