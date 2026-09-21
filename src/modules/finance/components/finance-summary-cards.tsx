@@ -58,7 +58,7 @@ export function FinanceSummaryCards() {
     <div className={GRID}>
       <SummaryCard
         title="Ingresos"
-        description={`Pedidos pagados de ${label}`}
+        description={`Órdenes pagadas de ${label}`}
         cents={incomeCents}
       />
       <SummaryCard

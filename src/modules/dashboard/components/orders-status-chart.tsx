@@ -35,7 +35,7 @@ export function OrdersStatusChart({ data }: Props) {
         <YAxis width={40} allowDecimals={false} {...AXIS_PROPS} />
         <Tooltip
           cursor={{ fill: "var(--color-muted)" }}
-          formatter={(value) => [String(value), "Pedidos"]}
+          formatter={(value) => [String(value), "Órdenes"]}
           {...TOOLTIP_PROPS}
         />
         <Bar

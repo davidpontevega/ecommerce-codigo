@@ -22,7 +22,7 @@ type NavItem = {
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   {
-    label: "Tablero",
+    label: "Dashboard",
     href: "/admin",
     icon: LayoutDashboard,
     permission: "dashboard.read",
@@ -46,7 +46,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     permission: "products.read",
   },
   {
-    label: "Pedidos",
+    label: "Órdenes",
     href: "/admin/orders",
     icon: Receipt,
     permission: "orders.read",

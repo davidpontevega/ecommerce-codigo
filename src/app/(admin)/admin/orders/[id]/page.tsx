@@ -26,7 +26,7 @@ export default async function AdminOrderDetailPage({
           href="/admin/orders"
           className="text-muted-foreground text-sm hover:underline"
         >
-          ← Pedidos
+          ← Órdenes
         </Link>
         <h1 className="text-2xl font-semibold">Detalle del pedido</h1>
         <p className="text-muted-foreground text-sm">

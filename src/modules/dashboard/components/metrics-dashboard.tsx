@@ -52,13 +52,13 @@ export function MetricsDashboard() {
     <div className={GRID}>
       <MetricCard
         title="Ventas"
-        description="Pedidos pagados, últimos 30 días"
+        description="Órdenes pagadas, últimos 30 días"
         className="lg:col-span-2"
       >
         <SalesChart data={metrics.salesByDay} />
       </MetricCard>
 
-      <MetricCard title="Pedidos por estado" description="Últimos 30 días">
+      <MetricCard title="Órdenes por estado" description="Últimos 30 días">
         <OrdersStatusChart data={metrics.ordersByStatus} />
       </MetricCard>
 

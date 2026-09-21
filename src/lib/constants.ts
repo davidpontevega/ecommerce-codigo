@@ -5,6 +5,6 @@
 
 /**
  * Umbral fijo de stock bajo (spec 015 D4 / 016 D1): es un aviso, no una
- * configuración. Lo leen el Tablero (`metrics.repository`) e Inventario.
+ * configuración. Lo leen el Dashboard (`metrics.repository`) e Inventario.
  */
 export const LOW_STOCK_THRESHOLD = 5;
