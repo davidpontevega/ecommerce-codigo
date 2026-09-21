@@ -28,7 +28,7 @@ function isSortField(value: string): value is SortField {
   return (adminOrderSortFields as ReadonlyArray<string>).includes(value);
 }
 
-export function AdminOrderTable() {
+export function AdminOrderTable({ canUpdate }: { canUpdate: boolean }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [statuses, setStatuses] = useState<AdminOrderStatus[]>([]);
@@ -43,7 +43,7 @@ export function AdminOrderTable() {
   });
 
   const debouncedSearch = useDebounce(search);
-  const columns = useMemo(() => adminOrderColumns(), []);
+  const columns = useMemo(() => adminOrderColumns({ canUpdate }), [canUpdate]);
 
   const activeSort = sorting[0];
   const sortBy: SortField =

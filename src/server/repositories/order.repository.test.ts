@@ -4,8 +4,10 @@ import { describe, test } from "node:test";
 import { PgDialect } from "drizzle-orm/pg-core";
 
 import { adminOrdersQuerySchema } from "@/modules/orders-admin/schemas/admin-order.schema";
+import type { Transaction } from "@/server/db";
+import type { Order } from "@/server/db/schema";
 
-import { buildAdminFilters } from "./order.repository";
+import { applyStatusChange, buildAdminFilters } from "./order.repository";
 
 const dialect = new PgDialect();
 
@@ -103,5 +105,97 @@ describe("buildAdminFilters", () => {
         .success,
       false,
     );
+  });
+});
+
+const ORDER_ID = "6f3b5d2e-1b2c-4d5e-8f90-123456789abc";
+const ACTOR_ID = "a1b2c3d4-1111-2222-3333-444455556666";
+
+type AuditRow = {
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  actorId: string | null;
+  changes: Record<string, unknown> | null;
+};
+
+/**
+ * Transacción de mentira: encadena solo lo que usa `applyStatusChange` y se
+ * queda con lo escrito, para verificar la bitácora sin abrir una conexión.
+ */
+const fakeTx = (before?: Order["status"]) => {
+  const audit: AuditRow[] = [];
+  const updates: Array<Record<string, unknown>> = [];
+
+  const tx = {
+    select: () => ({
+      from: () => ({
+        where: () => ({ limit: async () => (before ? [{ status: before }] : []) }),
+      }),
+    }),
+    update: () => ({
+      set: (values: Record<string, unknown>) => {
+        updates.push(values);
+        return {
+          where: () => ({
+            returning: async () => (before ? [{ id: ORDER_ID, ...values }] : []),
+          }),
+        };
+      },
+    }),
+    insert: () => ({
+      values: async (row: AuditRow) => {
+        audit.push(row);
+      },
+    }),
+  };
+
+  return { tx: tx as unknown as Transaction, audit, updates };
+};
+
+describe("applyStatusChange", () => {
+  // AC8: la bitácora guarda el salto y nada más —ni correo ni ids de Stripe.
+  test("logs the status jump with the actor and no other payload", async () => {
+    const { tx, audit, updates } = fakeTx("pending");
+
+    const updated = await applyStatusChange(tx, ORDER_ID, "paid", ACTOR_ID);
+
+    assert.deepEqual(updates, [{ status: "paid" }]);
+    assert.equal(updated?.status, "paid");
+    assert.deepEqual(audit, [
+      {
+        action: "order.status_changed",
+        entityType: "order",
+        entityId: ORDER_ID,
+        actorId: ACTOR_ID,
+        changes: { before: { status: "pending" }, after: { status: "paid" } },
+        metadata: null,
+        severity: "info",
+      },
+    ]);
+  });
+
+  // AC5 (D1): transición libre, incluido el camino de vuelta.
+  test("accepts any transition, including cancelled back to paid", async () => {
+    const { tx, audit } = fakeTx("cancelled");
+
+    await applyStatusChange(tx, ORDER_ID, "paid", ACTOR_ID);
+
+    assert.deepEqual(audit[0]?.changes, {
+      before: { status: "cancelled" },
+      after: { status: "paid" },
+    });
+  });
+
+  // AC7: pedido inexistente ⇒ `null` para el 404, y ninguna fila de bitácora.
+  test("returns null without auditing when the order does not exist", async () => {
+    const { tx, audit, updates } = fakeTx();
+
+    assert.equal(
+      await applyStatusChange(tx, ORDER_ID, "cancelled", ACTOR_ID),
+      null,
+    );
+    assert.deepEqual(updates, []);
+    assert.deepEqual(audit, []);
   });
 });

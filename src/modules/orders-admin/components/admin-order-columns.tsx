@@ -7,15 +7,11 @@ import {
   dataTableFeatures,
   type DataTableColumnDef,
 } from "@/components/shared/data-table";
-import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 
-import {
-  ORDER_STATUS_LABELS,
-  ORDER_STATUS_VARIANTS,
-  limaDateTimeFormatter,
-} from "../constants";
+import { limaDateTimeFormatter } from "../constants";
 import type { AdminOrderDto } from "../schemas/admin-order.schema";
+import { AdminOrderStatusSelect } from "./admin-order-status-select";
 
 const helper = createColumnHelper<typeof dataTableFeatures, AdminOrderDto>();
 
@@ -23,9 +19,11 @@ export function orderReference(order: AdminOrderDto): string {
   return `#${order.id.slice(0, 8).toUpperCase()}`;
 }
 
-export function adminOrderColumns(): ReadonlyArray<
-  DataTableColumnDef<AdminOrderDto>
-> {
+export function adminOrderColumns({
+  canUpdate,
+}: {
+  canUpdate: boolean;
+}): ReadonlyArray<DataTableColumnDef<AdminOrderDto>> {
   return helper.columns([
     helper.accessor("createdAt", {
       header: "Fecha",
@@ -62,9 +60,11 @@ export function adminOrderColumns(): ReadonlyArray<
       header: "Estado",
       enableSorting: false,
       cell: (info) => (
-        <Badge variant={ORDER_STATUS_VARIANTS[info.getValue()]}>
-          {ORDER_STATUS_LABELS[info.getValue()]}
-        </Badge>
+        <AdminOrderStatusSelect
+          orderId={info.row.original.id}
+          status={info.getValue()}
+          canUpdate={canUpdate}
+        />
       ),
     }),
     helper.display({

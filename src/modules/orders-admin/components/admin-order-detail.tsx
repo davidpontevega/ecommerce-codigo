@@ -2,7 +2,6 @@
 
 import { notFound } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,17 +16,14 @@ import {
 import { ApiError } from "@/lib/axios";
 import { formatPrice } from "@/lib/utils";
 
-import {
-  ORDER_STATUS_LABELS,
-  ORDER_STATUS_VARIANTS,
-  limaDateTimeFormatter,
-} from "../constants";
+import { limaDateTimeFormatter } from "../constants";
 import { useAdminOrder } from "../hooks/use-admin-orders";
 import { orderReference } from "./admin-order-columns";
+import { AdminOrderStatusSelect } from "./admin-order-status-select";
 
-type Props = { orderId: string };
+type Props = { orderId: string; canUpdate: boolean };
 
-export function AdminOrderDetail({ orderId }: Props) {
+export function AdminOrderDetail({ orderId, canUpdate }: Props) {
   const query = useAdminOrder(orderId);
 
   if (query.isPending) {
@@ -67,9 +63,11 @@ export function AdminOrderDetail({ orderId }: Props) {
           <span className="font-mono">{orderReference(order)}</span>
         </Field>
         <Field label="Estado">
-          <Badge variant={ORDER_STATUS_VARIANTS[order.status]}>
-            {ORDER_STATUS_LABELS[order.status]}
-          </Badge>
+          <AdminOrderStatusSelect
+            orderId={order.id}
+            status={order.status}
+            canUpdate={canUpdate}
+          />
         </Field>
         <Field label="Fecha">
           {limaDateTimeFormatter.format(new Date(order.createdAt))}

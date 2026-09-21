@@ -73,6 +73,11 @@ export const PERMISSIONS = {
     action: "read",
     description: "Ver el listado y el detalle de pedidos",
   },
+  "orders.update": {
+    resource: "orders",
+    action: "update",
+    description: "Cambiar a mano el estado de un pedido",
+  },
   "dashboard.read": {
     resource: "dashboard",
     action: "read",

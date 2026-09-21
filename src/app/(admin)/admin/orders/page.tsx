@@ -16,17 +16,19 @@ export default async function AdminOrdersPage() {
     notFound();
   }
 
+  const canUpdate = await can("orders.update");
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">Órdenes</h1>
         <p className="text-muted-foreground text-sm">
-          Consulta las órdenes de la tienda. El estado lo mueve el pago, no se
-          edita a mano.
+          Consulta las órdenes de la tienda. El pago mueve el estado solo;
+          {canUpdate ? " también puedes cambiarlo a mano." : " no se edita."}
         </p>
       </header>
 
-      <AdminOrderTable />
+      <AdminOrderTable canUpdate={canUpdate} />
     </div>
   );
 }

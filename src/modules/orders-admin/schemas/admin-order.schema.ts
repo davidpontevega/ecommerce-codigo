@@ -58,6 +58,14 @@ export type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 export const adminOrderIdSchema = z.uuid();
 
 /**
+ * Sin máquina de estados: cualquier transición es válida (spec 018 D1), el
+ * riesgo de marcar `paid` a mano está aceptado por el negocio.
+ */
+export const updateOrderStatusSchema = z.object({
+  status: z.enum(ADMIN_ORDER_STATUSES),
+});
+
+/**
  * Lo que recibe el cliente: `NextResponse.json` serializa las columnas
  * `timestamptz` a string ISO, no a `Date`.
  */

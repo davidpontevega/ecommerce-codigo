@@ -3,6 +3,7 @@ import { api } from "@/lib/axios";
 import type {
   AdminOrderDetailResponse,
   AdminOrderListResponse,
+  AdminOrderStatus,
   AdminOrdersQueryInput,
 } from "../schemas/admin-order.schema";
 
@@ -25,4 +26,15 @@ export async function getAdminOrder(
 ): Promise<AdminOrderDetailResponse> {
   const { data } = await api.get<AdminOrderDetailResponse>(`${RESOURCE}/${id}`);
   return data;
+}
+
+/**
+ * La respuesta no se usa: la vista se repinta invalidando `adminOrdersQueryKey`,
+ * que además devuelve los campos del cliente que el `UPDATE` no trae.
+ */
+export async function updateAdminOrderStatus(
+  id: string,
+  status: AdminOrderStatus,
+): Promise<void> {
+  await api.patch(`${RESOURCE}/${id}/status`, { status });
 }

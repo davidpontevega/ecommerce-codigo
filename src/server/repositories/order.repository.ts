@@ -15,6 +15,7 @@ import {
   type SQL,
 } from "drizzle-orm";
 
+import { logAudit } from "@/lib/audit";
 import { endOfLimaDay, startOfLimaDay } from "@/lib/utils";
 import type { AdminOrdersQueryInput } from "@/modules/orders-admin/schemas/admin-order.schema";
 import { db, type Database, type Transaction } from "@/server/db";
@@ -124,6 +125,64 @@ export async function markCancelled(
     .returning();
 
   return cancelled ?? null;
+}
+
+/* --------------------------------------------- cambio manual de estado ---
+ * Spec 018: el staff con `orders.update` mueve el estado a mano. Ni `markPaid`
+ * ni `markCancelled` sirven aquí: filtran por sesión de Stripe y por estado
+ * previo, y esta transición es libre (D1).
+ */
+
+/**
+ * La `tx` viaja por parámetro —como en `markPaid`— para poder verificar el
+ * payload de la bitácora sin abrir conexión (AC8).
+ */
+export async function applyStatusChange(
+  tx: Transaction,
+  id: string,
+  status: Order["status"],
+  actorId: string,
+): Promise<Order | null> {
+  // El estado previo se lee dentro de la misma transacción: `returning()` solo
+  // devuelve la fila ya escrita y la bitácora necesita el antes.
+  const [before] = await tx
+    .select({ status: orders.status })
+    .from(orders)
+    .where(eq(orders.id, id))
+    .limit(1);
+
+  if (!before) {
+    return null;
+  }
+
+  const [updated] = await tx
+    .update(orders)
+    .set({ status })
+    .where(eq(orders.id, id))
+    .returning();
+
+  if (!updated) {
+    return null;
+  }
+
+  await logAudit(tx, {
+    action: "order.status_changed",
+    entityType: "order",
+    actorId,
+    entityId: updated.id,
+    // Solo el salto de estado: ni correo del cliente ni referencias de Stripe.
+    changes: { before: { status: before.status }, after: { status } },
+  });
+
+  return updated;
+}
+
+export async function updateStatus(
+  id: string,
+  status: Order["status"],
+  actorId: string,
+): Promise<Order | null> {
+  return db.transaction((tx) => applyStatusChange(tx, id, status, actorId));
 }
 
 /**

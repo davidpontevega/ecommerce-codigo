@@ -19,6 +19,8 @@ export default async function AdminOrderDetailPage({
     notFound();
   }
 
+  const canUpdate = await can("orders.update");
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -30,11 +32,11 @@ export default async function AdminOrderDetailPage({
         </Link>
         <h1 className="text-2xl font-semibold">Detalle del pedido</h1>
         <p className="text-muted-foreground text-sm">
-          Solo lectura: las referencias de Stripe sirven para rastrear el pago.
+          Las referencias de Stripe sirven para rastrear el pago.
         </p>
       </header>
 
-      <AdminOrderDetail orderId={id} />
+      <AdminOrderDetail orderId={id} canUpdate={canUpdate} />
     </div>
   );
 }
