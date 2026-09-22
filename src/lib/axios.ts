@@ -1,7 +1,5 @@
 import axios, { AxiosError } from "axios";
 
-import { getAppUrl } from "@/lib/env";
-
 export class ApiError extends Error {
   readonly status: number;
 
@@ -12,9 +10,13 @@ export class ApiError extends Error {
   }
 }
 
-const baseURL = process.env.NEXT_PUBLIC_APP_URL ? `${getAppUrl()}/api` : "/api";
-
-export const api = axios.create({ baseURL });
+// `api` solo se usa en el navegador (hooks "use client", nunca desde un
+// Server Component o Route Handler): relativo, para que resuelva contra el
+// origen real de la pestaña. Vercel expone varias URLs válidas para el mismo
+// deploy (alias + URL única por build); un baseURL absoluto construido con
+// NEXT_PUBLIC_APP_URL solo calza con una de ellas y las demás disparan CORS
+// cross-origin contra Route Handlers que nunca respondieron con esos headers.
+export const api = axios.create({ baseURL: "/api" });
 
 // La UI necesita distinguir 409 de 500 sin importar axios en un componente.
 api.interceptors.response.use(
