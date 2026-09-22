@@ -5,7 +5,11 @@ import type {
   ProductQueryInput,
   ProductUpdateInput,
 } from "../schemas/product.schema";
-import type { ProductDto, ProductListResponse } from "../types/product.types";
+import type {
+  ProductDto,
+  ProductListResponse,
+  ProductWithCostDto,
+} from "../types/product.types";
 
 const RESOURCE = "/products";
 
@@ -16,8 +20,9 @@ export async function listProducts(
   return data;
 }
 
-export async function getProduct(id: string): Promise<ProductDto> {
-  const { data } = await api.get<ProductDto>(`${RESOURCE}/${id}`);
+/** Única lectura que trae el costo; exige `products.read` (spec 019 D8). */
+export async function getProduct(id: string): Promise<ProductWithCostDto> {
+  const { data } = await api.get<ProductWithCostDto>(`${RESOURCE}/${id}`);
   return data;
 }
 

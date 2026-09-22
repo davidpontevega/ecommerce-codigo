@@ -9,11 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IGV_RATE_PERCENT } from "@/lib/tax";
 import { formatPrice } from "@/lib/utils";
 
 import { useFinanceSummary } from "../hooks/use-finance-summary";
 
-const GRID = "grid gap-4 sm:grid-cols-3";
+const GRID = "grid gap-4 sm:grid-cols-2 lg:grid-cols-4";
 
 const monthFormatter = new Intl.DateTimeFormat("es", {
   month: "long",
@@ -31,7 +32,7 @@ export function FinanceSummaryCards() {
   if (query.isPending) {
     return (
       <div className={GRID}>
-        {[0, 1, 2].map((slot) => (
+        {[0, 1, 2, 3].map((slot) => (
           <Skeleton key={slot} className="h-[130px] w-full rounded-xl" />
         ))}
       </div>
@@ -51,7 +52,7 @@ export function FinanceSummaryCards() {
     );
   }
 
-  const { month, incomeCents, expenseCents, netCents } = query.data;
+  const { month, incomeCents, expenseCents, igvCents, netCents } = query.data;
   const label = monthLabel(month);
 
   return (
@@ -67,8 +68,13 @@ export function FinanceSummaryCards() {
         cents={expenseCents}
       />
       <SummaryCard
-        title="Neto"
-        description="Ingresos menos egresos"
+        title={`Impuestos (IGV ${IGV_RATE_PERCENT} %)`}
+        description="Ya incluido en los precios cobrados"
+        cents={igvCents}
+      />
+      <SummaryCard
+        title="Ganancias"
+        description="Ingresos menos IGV y egresos"
         cents={netCents}
         // Un neto negativo es información, no un error: se señala en color.
         className={netCents < 0 ? "text-destructive" : undefined}

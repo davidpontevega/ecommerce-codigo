@@ -14,6 +14,11 @@ const invalidId = () =>
 const notFound = () =>
   NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
 
+/**
+ * Lectura del panel, no pública: devuelve el producto **con su costo**
+ * (spec 019 D8). La tienda no pasa por aquí —usa `findBySlug` en el servidor—,
+ * así que el permiso no cierra ninguna puerta que el cliente necesitara.
+ */
 export async function GET(
   _request: NextRequest,
   { params }: RouteContext<"/api/products/[id]">,
@@ -22,6 +27,12 @@ export async function GET(
 
   if (!productIdSchema.safeParse(id).success) {
     return invalidId();
+  }
+
+  try {
+    await requirePermission("products.read");
+  } catch (error) {
+    return authErrorResponse(error);
   }
 
   try {

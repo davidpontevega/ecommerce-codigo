@@ -29,9 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/axios";
 
 import { useActiveCategories } from "../hooks/use-active-categories";
+import { useProduct } from "../hooks/use-product";
 import {
   useCreateProduct,
   useUpdateProduct,
@@ -40,7 +42,10 @@ import {
   productCreateSchema,
   type ProductFormValues,
 } from "../schemas/product.schema";
-import type { ProductDto } from "../types/product.types";
+import type {
+  ProductDto,
+  ProductWithCostDto,
+} from "../types/product.types";
 
 function slugify(value: string): string {
   return value
@@ -60,6 +65,7 @@ const emptyValues: ProductFormValues = {
   description: "",
   priceCents: 0,
   compareAtPriceCents: null,
+  costCents: null,
   stock: 0,
   brand: "",
   specs: null,
@@ -88,7 +94,7 @@ function toSpecsRecord(pairs: SpecPair[]): Record<string, string> | null {
   return entries.length > 0 ? Object.fromEntries(entries) : null;
 }
 
-function toFormValues(product: ProductDto | null): ProductFormValues {
+function toFormValues(product: ProductWithCostDto | null): ProductFormValues {
   if (!product) return emptyValues;
 
   return {
@@ -99,6 +105,7 @@ function toFormValues(product: ProductDto | null): ProductFormValues {
     description: product.description ?? "",
     priceCents: product.priceCents,
     compareAtPriceCents: product.compareAtPriceCents,
+    costCents: product.costCents,
     stock: product.stock,
     brand: product.brand ?? "",
     specs: product.specs,
@@ -109,7 +116,7 @@ function toFormValues(product: ProductDto | null): ProductFormValues {
 
 type ProductFormProps = {
   /** `null` abre el formulario en modo creación. */
-  product: ProductDto | null;
+  product: ProductWithCostDto | null;
   onClose: () => void;
 };
 
@@ -282,6 +289,22 @@ function ProductForm({ product, onClose }: ProductFormProps) {
           </Field>
 
           <Field>
+            <FieldLabel htmlFor="product-cost">Costo (centavos)</FieldLabel>
+            <Input
+              id="product-cost"
+              type="number"
+              inputMode="numeric"
+              autoComplete="off"
+              {...form.register("costCents", optionalNumber)}
+            />
+            <FieldDescription>
+              Opcional. Lo que cuesta el producto sin IGV; solo se usa para
+              calcular el margen en Finanzas.
+            </FieldDescription>
+            <FieldError errors={[form.formState.errors.costCents]} />
+          </Field>
+
+          <Field>
             <FieldLabel htmlFor="product-stock">Stock</FieldLabel>
             <Input
               id="product-stock"
@@ -432,17 +455,52 @@ type ProductFormDialogProps = {
   product: ProductDto | null;
 };
 
+/**
+ * En edición espera al detalle antes de montar el formulario: la fila de la
+ * tabla no trae el costo (spec 019 D8) y los `defaultValues` se calculan una
+ * sola vez, al montar.
+ */
 export function ProductFormDialog({
   open,
   onOpenChange,
   product,
 }: ProductFormDialogProps) {
+  const detailQuery = useProduct(product?.id ?? null, open);
+  const detail = product ? (detailQuery.data ?? null) : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        {open ? (
-          <ProductForm product={product} onClose={() => onOpenChange(false)} />
-        ) : null}
+        {!open ? null : product && !detail ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Editar producto</DialogTitle>
+              <DialogDescription>
+                {detailQuery.isError
+                  ? "No se pudo cargar el producto."
+                  : "Cargando los datos del producto…"}
+              </DialogDescription>
+            </DialogHeader>
+            {detailQuery.isError ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => void detailQuery.refetch()}
+              >
+                Reintentar
+              </Button>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {[0, 1, 2, 3].map((slot) => (
+                  <Skeleton key={slot} className="h-10 w-full" />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <ProductForm product={detail} onClose={() => onOpenChange(false)} />
+        )}
       </DialogContent>
     </Dialog>
   );

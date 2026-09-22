@@ -29,5 +29,23 @@ export type FinanceSummary = {
   month: string;
   incomeCents: number;
   expenseCents: number;
+  /** IGV contenido en los ingresos: nunca fue plata del negocio (spec 019 D1). */
+  igvCents: number;
+  /** Ganancia real: ingresos − IGV − egresos (spec 019 D2). */
   netCents: number;
 };
+
+/** Fila de la vista de Precio Unitario (spec 019 D6). */
+export type UnitMarginDto = {
+  id: string;
+  sku: string;
+  name: string;
+  priceCents: number;
+  /** `null` = sin costo cargado, y entonces no hay margen que mostrar. */
+  costCents: number | null;
+  priceNetCents: number;
+  marginCents: number | null;
+  marginPercent: number | null;
+};
+
+export type UnitMarginListResponse = { data: UnitMarginDto[] };

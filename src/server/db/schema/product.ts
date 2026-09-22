@@ -26,6 +26,11 @@ export const products = pgTable(
     description: text("description"),
     priceCents: integer("price_cents").notNull(),
     compareAtPriceCents: integer("compare_at_price_cents"),
+    /**
+     * Costo unitario en centavos. `null` = sin dato, no cero: sin costo no hay
+     * margen que calcular (spec 019 D5). Nunca sale por una lectura pública.
+     */
+    costCents: integer("cost_cents"),
     stock: integer("stock").notNull().default(0),
     brand: text("brand"),
     specs: jsonb("specs").$type<Record<string, string> | null>(),

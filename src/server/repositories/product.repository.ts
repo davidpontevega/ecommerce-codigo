@@ -4,7 +4,6 @@ import {
   count,
   desc,
   eq,
-  getTableColumns,
   gt,
   gte,
   ilike,
@@ -23,15 +22,47 @@ import type {
   ProductQueryInput,
   ProductUpdateInput,
 } from "@/modules/products/schemas/product.schema";
-import type { ProductWithCategory } from "@/modules/products/types/product.types";
+import type {
+  ProductWithCategory,
+  ProductWithCost,
+} from "@/modules/products/types/product.types";
 import type { ProductDetail } from "@/modules/storefront/types/storefront.types";
 import { db, type Transaction } from "@/server/db";
 import { categories, products } from "@/server/db/schema";
 
-const productSelection = {
-  ...getTableColumns(products),
+/**
+ * Columnas enumeradas y **no** `getTableColumns(products)`: esta selección
+ * alimenta `GET /api/products` y el SSR del storefront, así que cualquier
+ * columna nueva que entrara sola sería una filtración (spec 019 D8). `cost_cents`
+ * es el caso concreto: se omite aquí y solo se añade en `adminSelection`.
+ *
+ * Esta enumeración manual es la **única** defensa: el tipo de retorno no la
+ * respalda —TypeScript no aplica excess property check a una fila que se asigna
+ * a `ProductWithCategory`—, así que volver a `getTableColumns` compilaría sin
+ * un solo error. Lo que avisa es el test `productSelection` de este repo.
+ */
+export const productSelection = {
+  id: products.id,
+  categoryId: products.categoryId,
+  sku: products.sku,
+  name: products.name,
+  slug: products.slug,
+  description: products.description,
+  priceCents: products.priceCents,
+  compareAtPriceCents: products.compareAtPriceCents,
+  stock: products.stock,
+  brand: products.brand,
+  specs: products.specs,
+  weightGrams: products.weightGrams,
+  imageUrl: products.imageUrl,
+  deletedAt: products.deletedAt,
+  createdAt: products.createdAt,
+  updatedAt: products.updatedAt,
   categoryName: categories.name,
 };
+
+/** Lecturas del panel: las únicas que ven el costo. */
+const adminSelection = { ...productSelection, costCents: products.costCents };
 
 const categoryJoin = eq(products.categoryId, categories.id);
 
@@ -58,13 +89,14 @@ const editableKeys = [
   "description",
   "priceCents",
   "compareAtPriceCents",
+  "costCents",
   "stock",
   "brand",
   "specs",
   "weightGrams",
   "imageUrl",
 ] as const satisfies ReadonlyArray<
-  keyof ProductUpdateInput & keyof ProductWithCategory
+  keyof ProductUpdateInput & keyof ProductWithCost
 >;
 
 export type ProductListResult = {
@@ -75,11 +107,11 @@ export type ProductListResult = {
 };
 
 export type RestoreResult =
-  | { ok: true; product: ProductWithCategory }
+  | { ok: true; product: ProductWithCost }
   | { ok: false; reason: "not-found" | "not-deleted" };
 
 export type UpdateResult =
-  | { ok: true; product: ProductWithCategory }
+  | { ok: true; product: ProductWithCost }
   | { ok: false; reason: "not-found" | "no-changes" };
 
 type PostgresError = { code?: unknown; constraint?: unknown; message: string };
@@ -188,9 +220,9 @@ export function buildFilters(params: ProductQueryInput): SQL | undefined {
 async function findInTransaction(
   tx: Transaction,
   id: string,
-): Promise<ProductWithCategory | null> {
+): Promise<ProductWithCost | null> {
   const [product] = await tx
-    .select(productSelection)
+    .select(adminSelection)
     .from(products)
     .innerJoin(categories, categoryJoin)
     .where(eq(products.id, id))
@@ -241,11 +273,10 @@ export async function listBrands(): Promise<string[]> {
   return rows.flatMap((row) => (row.brand === null ? [] : [row.brand]));
 }
 
-export async function findById(
-  id: string,
-): Promise<ProductWithCategory | null> {
+/** Lectura del panel: trae el costo, por eso el endpoint exige `products.read`. */
+export async function findById(id: string): Promise<ProductWithCost | null> {
   const [product] = await db
-    .select(productSelection)
+    .select(adminSelection)
     .from(products)
     .innerJoin(categories, categoryJoin)
     .where(eq(products.id, id))
@@ -330,7 +361,7 @@ export async function decrementStock(
 export async function create(
   input: ProductCreateInput,
   actorId?: string | null,
-): Promise<ProductWithCategory> {
+): Promise<ProductWithCost> {
   return db.transaction(async (tx) => {
     const [created] = await tx
       .insert(products)
@@ -342,6 +373,7 @@ export async function create(
         description: input.description ?? null,
         priceCents: input.priceCents,
         compareAtPriceCents: input.compareAtPriceCents ?? null,
+        costCents: input.costCents ?? null,
         stock: input.stock,
         brand: input.brand ?? null,
         specs: input.specs ?? null,
@@ -438,7 +470,7 @@ export async function update(
 export async function softDelete(
   id: string,
   actorId?: string | null,
-): Promise<ProductWithCategory | null> {
+): Promise<ProductWithCost | null> {
   return db.transaction(async (tx) => {
     const [deleted] = await tx
       .update(products)

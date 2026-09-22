@@ -10,6 +10,7 @@ import {
   findPostgresError,
   isDifferent,
   mapDbError,
+  productSelection,
 } from "./product.repository";
 
 /** Error de driver: `Error` con las propiedades que expone node-postgres/Neon. */
@@ -122,6 +123,47 @@ describe("findPostgresError", () => {
   test("returns null for values that are not errors", () => {
     assert.equal(findPostgresError(null), null);
     assert.equal(findPostgresError("23505"), null);
+  });
+});
+
+/**
+ * Regresión de la fuga de costo (spec 019 D8). El tipo de retorno no protege
+ * nada —`Omit<Product, "costCents">` compila igual si alguien vuelve a
+ * `{ ...getTableColumns(products), categoryName }`—, así que la enumeración de
+ * `productSelection` necesita esta red. `list()` la usa tal cual y
+ * `findBySlug()` la extiende, o sea que ambas lecturas públicas quedan cubiertas.
+ */
+describe("productSelection", () => {
+  test("selects exactly the public columns", () => {
+    assert.deepEqual(Object.keys(productSelection).sort(), [
+      "brand",
+      "categoryId",
+      "categoryName",
+      "compareAtPriceCents",
+      "createdAt",
+      "deletedAt",
+      "description",
+      "id",
+      "imageUrl",
+      "name",
+      "priceCents",
+      "sku",
+      "slug",
+      "specs",
+      "stock",
+      "updatedAt",
+      "weightGrams",
+    ]);
+  });
+
+  // Por nombre de columna de Postgres, no por clave JS: renombrar la propiedad
+  // no debe bastar para colar el costo en el catálogo público.
+  test("never selects the cost column", () => {
+    const columnNames = Object.values(productSelection).map(
+      (column) => column.name,
+    );
+
+    assert.equal(columnNames.includes("cost_cents"), false);
   });
 });
 

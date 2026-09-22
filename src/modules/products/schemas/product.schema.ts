@@ -75,6 +75,13 @@ const productFields = z.object({
     .int()
     .positive("El precio debe ser mayor a 0"),
   compareAtPriceCents: z.number().int().positive().nullish(),
+  // Costo unitario en centavos (spec 019 D4). Opcional y sin `.default()`: en un
+  // PATCH parcial un default lo pondría a 0, que no es lo mismo que "sin dato".
+  costCents: z
+    .number()
+    .int("El costo va en centavos enteros")
+    .positive("El costo debe ser mayor a 0")
+    .nullish(),
   stock: z.number("El stock es obligatorio").int().min(0).default(0),
   brand: z.string().trim().max(120).nullish(),
   specs: z.record(z.string(), z.string()).nullish(),

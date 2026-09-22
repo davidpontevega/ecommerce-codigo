@@ -5,6 +5,7 @@ import {
   Package,
   Receipt,
   ShieldCheck,
+  Tags,
   Users,
   Wallet,
 } from "lucide-react";
@@ -55,6 +56,12 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     label: "Finanzas",
     href: "/admin/finance",
     icon: Wallet,
+    permission: "finance.manage",
+  },
+  {
+    label: "Precio unitario",
+    href: "/admin/finance/unit-price",
+    icon: Tags,
     permission: "finance.manage",
   },
   {
